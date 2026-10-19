@@ -4,7 +4,7 @@ use anyhow::{bail, Context};
 use clap::Parser;
 use cli::{
     AttestCommand, AuditCommand, CaCommand, CaInitArgs, CaIssueArgs, CaRevokeArgs, CaVerifyArgs,
-    Cli, Command, NodeCommand, TokenCommand,
+    Cli, Command, NodeCommand, SamlCommand, SamlVerifyArgs, TokenCommand,
 };
 use fleet_pki::{Ca, CaConfig, IssuedCert, LeafSpec, LeafUsage, NodeKeypair};
 use serde::{Deserialize, Serialize};
@@ -32,6 +32,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Node { command } => run_node(&state_dir, &server, insecure, command).await,
         Command::Token { command } => run_token(&state_dir, &server, insecure, command).await,
         Command::Attest { command } => run_attest(command),
+        Command::Saml { command } => run_saml(command),
         Command::Login(args) => run_login(&state_dir, &server, insecure, args).await,
         Command::Audit { command } => run_audit(&state_dir, command),
     }
@@ -344,23 +345,40 @@ async fn run_token(
     }
 }
 
+fn load_operator_token(state_dir: &Path) -> anyhow::Result<String> {
+    let path = state_dir.join("operator-token.json");
+    let raw = std::fs::read(&path).with_context(|| {
+        format!(
+            "no operator token at {}; run `fleetctl login --group fleet-admin` first",
+            path.display()
+        )
+    })?;
+    #[derive(Deserialize)]
+    struct TokenFile {
+        access_token: String,
+        expires_at: i64,
+    }
+    let token: TokenFile = serde_json::from_slice(&raw)?;
+    if token.expires_at <= fleet_pki::unix_now() {
+        bail!("operator token expired; run `fleetctl login` again");
+    }
+    Ok(token.access_token)
+}
+
 fn operator_client(state_dir: &Path, insecure: bool) -> anyhow::Result<reqwest::Client> {
-    let mut builder = reqwest::Client::builder().danger_accept_invalid_certs(insecure);
+    let token = load_operator_token(state_dir)?;
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(
+        reqwest::header::AUTHORIZATION,
+        format!("Bearer {token}").parse()?,
+    );
+    let mut builder = reqwest::Client::builder()
+        .danger_accept_invalid_certs(insecure)
+        .default_headers(headers);
     let root = state_dir.join("root-cert.pem");
     if root.exists() {
         let pem = std::fs::read(&root)?;
         builder = builder.add_root_certificate(reqwest::Certificate::from_pem(&pem)?);
-    }
-    let node_dir = state_dir.join("nodes/operator-admin");
-    let cert = node_dir.join("node.crt.pem");
-    let key = node_dir.join("node.key.pem");
-    if cert.exists() && key.exists() {
-        let identity = format!(
-            "{}{}",
-            std::fs::read_to_string(cert)?,
-            std::fs::read_to_string(key)?
-        );
-        builder = builder.identity(reqwest::Identity::from_pem(identity.as_bytes())?);
     }
     Ok(builder.build()?)
 }
@@ -425,15 +443,176 @@ fn run_attest(command: AttestCommand) -> anyhow::Result<()> {
     }
 }
 
-async fn run_login(
-    _state_dir: &Path,
-    _server: &str,
-    _insecure: bool,
-    _args: cli::LoginArgs,
-) -> anyhow::Result<()> {
-    bail!("login is not available in this build")
+#[derive(Debug, serde::Deserialize)]
+struct DeviceAuthResponse {
+    device_code: String,
+    user_code: String,
+    verification_uri: String,
+    expires_in: u64,
+    interval: u64,
 }
 
-fn run_audit(_state_dir: &Path, _command: AuditCommand) -> anyhow::Result<()> {
-    bail!("audit commands are not available in this build")
+#[derive(Debug, serde::Deserialize)]
+struct TokenResponse {
+    access_token: String,
+    expires_in: i64,
+}
+
+async fn run_login(
+    state_dir: &Path,
+    server: &str,
+    insecure: bool,
+    args: cli::LoginArgs,
+) -> anyhow::Result<()> {
+    let http = reqwest::Client::builder()
+        .danger_accept_invalid_certs(insecure)
+        .build()?;
+    let nonce = hex::encode({
+        let mut bytes = [0u8; 16];
+        use rand::RngCore;
+        rand::thread_rng().fill_bytes(&mut bytes);
+        bytes
+    });
+    let device: DeviceAuthResponse = http
+        .post(format!(
+            "{}/device_authorization",
+            args.idp.trim_end_matches('/')
+        ))
+        .json(&serde_json::json!({
+            "client_id": "fleetctl",
+            "scope": "openid profile groups",
+            "groups": [args.group],
+            "nonce": nonce,
+            "subject": "operator@fleet.internal"
+        }))
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    println!(
+        "Open {} and enter code {}",
+        device.verification_uri, device.user_code
+    );
+    println!("(the mock IdP auto-approves device codes)");
+
+    let mut token: Option<TokenResponse> = None;
+    for _ in 0..=device.expires_in / device.interval.max(1) {
+        let response = http
+            .post(format!("{}/token", args.idp.trim_end_matches('/')))
+            .json(&serde_json::json!({
+                "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                "device_code": device.device_code,
+                "client_id": "fleetctl"
+            }))
+            .send()
+            .await?;
+        if response.status().is_success() {
+            token = Some(response.json().await?);
+            break;
+        }
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+        if body.contains("authorization_pending") {
+            tokio::time::sleep(std::time::Duration::from_secs(device.interval.max(1))).await;
+            continue;
+        }
+        bail!("token endpoint returned {status}: {body}");
+    }
+    let token = token.context("device authorization expired before approval")?;
+    let expires_at = fleet_pki::unix_now() + token.expires_in;
+    std::fs::create_dir_all(state_dir)?;
+    let path = state_dir.join("operator-token.json");
+    std::fs::write(
+        &path,
+        serde_json::to_vec_pretty(&serde_json::json!({
+            "access_token": token.access_token,
+            "expires_at": expires_at,
+            "issuer": args.idp,
+            "groups": [args.group],
+            "nonce": nonce,
+        }))?,
+    )?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600))?;
+    }
+
+    let session = operator_client(state_dir, insecure)?
+        .get(format!("{server}/v1/auth/session"))
+        .send()
+        .await?;
+    let status = session.status();
+    let body: serde_json::Value = session.json().await?;
+    if !status.is_success() {
+        bail!("operator session validation failed with {status}: {body}");
+    }
+    println!(
+        "logged in as {} with groups {}",
+        body["subject"], body["groups"]
+    );
+    println!("token saved to {}", path.display());
+    Ok(())
+}
+
+fn run_saml(command: SamlCommand) -> anyhow::Result<()> {
+    match command {
+        SamlCommand::Verify(args) => saml_verify(args),
+    }
+}
+
+fn saml_verify(args: SamlVerifyArgs) -> anyhow::Result<()> {
+    let xml = std::fs::read_to_string(&args.response)
+        .with_context(|| format!("reading SAML response {}", args.response.display()))?;
+    let key = std::fs::read_to_string(&args.key)
+        .with_context(|| format!("reading IdP public key {}", args.key.display()))?;
+    let config = fleetd::saml::SamlConfig {
+        public_key_pem: key,
+        expected_issuer: args.issuer,
+        audience: args.audience,
+        destination: args.destination,
+        clock_skew_seconds: 60,
+    };
+    let mut replay = fleetd::saml::ReplayCache::new();
+    let assertion = config
+        .verify(&xml, &args.in_response_to, &mut replay)
+        .map_err(|e| anyhow::anyhow!("SAML verification failed: {e}"))?;
+    println!("SAML assertion verified");
+    println!("subject:        {}", assertion.subject);
+    println!("groups:         {}", assertion.groups.join(","));
+    println!("issuer:         {}", assertion.issuer);
+    println!("audience:       {}", assertion.audience);
+    println!("destination:    {}", assertion.destination);
+    println!("inResponseTo:   {}", assertion.in_response_to);
+    println!("assertion id:   {}", assertion.assertion_id);
+    println!("notOnOrAfter:   {}", assertion.not_on_or_after);
+    Ok(())
+}
+
+fn run_audit(state_dir: &Path, command: AuditCommand) -> anyhow::Result<()> {
+    match command {
+        AuditCommand::Verify => {
+            let path = state_dir.join("audit.jsonl");
+            let report = fleetd::audit::verify(&path)?;
+            println!("audit log: {}", path.display());
+            println!("records:   {}", report.records);
+            println!("last hash: {}", report.last_hash);
+            if report.valid {
+                println!("result:    OK (hash chain intact)");
+                Ok(())
+            } else {
+                println!(
+                    "result:    TAMPERED at sequence {}: {}",
+                    report
+                        .first_bad_seq
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| "-".into()),
+                    report.reason.unwrap_or_default()
+                );
+                std::process::exit(1);
+            }
+        }
+    }
 }

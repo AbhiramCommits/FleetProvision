@@ -1,30 +1,30 @@
 # FleetProvision provisioning e2e
 
-Generated 2026-10-19 20:21:31.766582 +00:00:00 on macos. 20 nodes requested, 20 succeeded, 0 failed, wall 83 ms.
+Generated 2026-10-19 20:47:49.645248 +00:00:00 on macos. 20 nodes requested, 20 succeeded, 0 failed, wall 896 ms.
 
 | node | mac | distro | total ms | vlan | stages | result |
 | --- | --- | --- | --- | --- | --- | --- |
-| rack-a-node-001 | 52:54:00:aa:bb:01 | ubuntu | 56 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=50ms 802.1x=1ms | OK |
-| rack-a-node-002 | 52:54:00:aa:bb:02 | fedora | 62 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=56ms 802.1x=0ms | OK |
-| rack-a-node-003 | 52:54:00:aa:bb:03 | ubuntu | 61 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=55ms 802.1x=1ms | OK |
-| rack-a-node-004 | 52:54:00:aa:bb:04 | fedora | 63 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=56ms 802.1x=1ms | OK |
-| rack-a-node-005 | 52:54:00:aa:bb:05 | ubuntu | 61 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=55ms 802.1x=1ms | OK |
-| rack-a-node-006 | 52:54:00:aa:bb:06 | fedora | 68 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=63ms 802.1x=0ms | OK |
-| rack-a-node-007 | 52:54:00:aa:bb:07 | ubuntu | 56 | 100 | dhcp=0ms tftp=1ms http=2ms dns=0ms attest+enroll=51ms 802.1x=0ms | OK |
-| rack-a-node-008 | 52:54:00:aa:bb:08 | fedora | 67 | 100 | dhcp=0ms tftp=0ms http=3ms dns=1ms attest+enroll=60ms 802.1x=1ms | OK |
-| rack-a-node-009 | 52:54:00:aa:bb:09 | ubuntu | 42 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=37ms 802.1x=0ms | OK |
-| rack-a-node-010 | 52:54:00:aa:bb:0a | fedora | 64 | 100 | dhcp=0ms tftp=0ms http=2ms dns=29ms attest+enroll=29ms 802.1x=1ms | OK |
-| rack-a-node-011 | 52:54:00:aa:bb:0b | ubuntu | 43 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=37ms 802.1x=1ms | OK |
-| rack-a-node-012 | 52:54:00:aa:bb:0c | fedora | 44 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=39ms 802.1x=0ms | OK |
-| rack-a-node-013 | 52:54:00:aa:bb:0d | ubuntu | 67 | 100 | dhcp=0ms tftp=1ms http=3ms dns=0ms attest+enroll=60ms 802.1x=1ms | OK |
-| rack-a-node-014 | 52:54:00:aa:bb:0e | fedora | 45 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=40ms 802.1x=0ms | OK |
-| rack-a-node-015 | 52:54:00:aa:bb:0f | ubuntu | 69 | 100 | dhcp=0ms tftp=0ms http=32ms dns=1ms attest+enroll=33ms 802.1x=0ms | OK |
-| rack-a-node-016 | 52:54:00:aa:bb:10 | fedora | 57 | 100 | dhcp=0ms tftp=0ms http=2ms dns=1ms attest+enroll=51ms 802.1x=0ms | OK |
-| rack-a-node-017 | 52:54:00:aa:bb:11 | ubuntu | 68 | 100 | dhcp=0ms tftp=1ms http=2ms dns=29ms attest+enroll=34ms 802.1x=0ms | OK |
-| rack-a-node-018 | 52:54:00:aa:bb:12 | fedora | 64 | 100 | dhcp=0ms tftp=1ms http=3ms dns=29ms attest+enroll=29ms 802.1x=1ms | OK |
-| rack-a-node-019 | 52:54:00:aa:bb:13 | ubuntu | 66 | 100 | dhcp=0ms tftp=1ms http=2ms dns=29ms attest+enroll=30ms 802.1x=2ms | OK |
-| rack-a-node-020 | 52:54:00:aa:bb:14 | fedora | 67 | 100 | dhcp=0ms tftp=0ms http=2ms dns=29ms attest+enroll=32ms 802.1x=1ms | OK |
+| rack-a-node-001 | 52:54:00:aa:bb:01 | ubuntu | 269 | 100 | dhcp=0ms tftp=0ms http=48ms dns=1ms attest+enroll=209ms 802.1x=7ms | OK |
+| rack-a-node-002 | 52:54:00:aa:bb:02 | fedora | 199 | 100 | dhcp=0ms tftp=0ms http=6ms dns=1ms attest+enroll=183ms 802.1x=6ms | OK |
+| rack-a-node-003 | 52:54:00:aa:bb:03 | ubuntu | 115 | 100 | dhcp=0ms tftp=1ms http=4ms dns=0ms attest+enroll=105ms 802.1x=3ms | OK |
+| rack-a-node-004 | 52:54:00:aa:bb:04 | fedora | 119 | 100 | dhcp=0ms tftp=1ms http=5ms dns=3ms attest+enroll=105ms 802.1x=3ms | OK |
+| rack-a-node-005 | 52:54:00:aa:bb:05 | ubuntu | 208 | 100 | dhcp=0ms tftp=1ms http=7ms dns=40ms attest+enroll=153ms 802.1x=4ms | OK |
+| rack-a-node-006 | 52:54:00:aa:bb:06 | fedora | 84 | 100 | dhcp=0ms tftp=1ms http=5ms dns=3ms attest+enroll=66ms 802.1x=6ms | OK |
+| rack-a-node-007 | 52:54:00:aa:bb:07 | ubuntu | 243 | 100 | dhcp=0ms tftp=0ms http=5ms dns=2ms attest+enroll=224ms 802.1x=8ms | OK |
+| rack-a-node-008 | 52:54:00:aa:bb:08 | fedora | 149 | 100 | dhcp=0ms tftp=1ms http=4ms dns=0ms attest+enroll=136ms 802.1x=5ms | OK |
+| rack-a-node-009 | 52:54:00:aa:bb:09 | ubuntu | 282 | 100 | dhcp=0ms tftp=0ms http=52ms dns=0ms attest+enroll=224ms 802.1x=3ms | OK |
+| rack-a-node-010 | 52:54:00:aa:bb:0a | fedora | 90 | 100 | dhcp=0ms tftp=0ms http=5ms dns=2ms attest+enroll=78ms 802.1x=2ms | OK |
+| rack-a-node-011 | 52:54:00:aa:bb:0b | ubuntu | 174 | 100 | dhcp=0ms tftp=0ms http=9ms dns=39ms attest+enroll=117ms 802.1x=6ms | OK |
+| rack-a-node-012 | 52:54:00:aa:bb:0c | fedora | 259 | 100 | dhcp=0ms tftp=1ms http=9ms dns=39ms attest+enroll=204ms 802.1x=4ms | OK |
+| rack-a-node-013 | 52:54:00:aa:bb:0d | ubuntu | 225 | 100 | dhcp=0ms tftp=0ms http=9ms dns=39ms attest+enroll=170ms 802.1x=4ms | OK |
+| rack-a-node-014 | 52:54:00:aa:bb:0e | fedora | 185 | 100 | dhcp=0ms tftp=0ms http=47ms dns=0ms attest+enroll=129ms 802.1x=5ms | OK |
+| rack-a-node-015 | 52:54:00:aa:bb:0f | ubuntu | 219 | 100 | dhcp=1ms tftp=1ms http=8ms dns=39ms attest+enroll=163ms 802.1x=6ms | OK |
+| rack-a-node-016 | 52:54:00:aa:bb:10 | fedora | 167 | 100 | dhcp=0ms tftp=0ms http=4ms dns=1ms attest+enroll=156ms 802.1x=3ms | OK |
+| rack-a-node-017 | 52:54:00:aa:bb:11 | ubuntu | 251 | 100 | dhcp=0ms tftp=0ms http=4ms dns=0ms attest+enroll=238ms 802.1x=6ms | OK |
+| rack-a-node-018 | 52:54:00:aa:bb:12 | fedora | 275 | 100 | dhcp=0ms tftp=1ms http=3ms dns=0ms attest+enroll=263ms 802.1x=5ms | OK |
+| rack-a-node-019 | 52:54:00:aa:bb:13 | ubuntu | 99 | 100 | dhcp=1ms tftp=0ms http=3ms dns=1ms attest+enroll=87ms 802.1x=5ms | OK |
+| rack-a-node-020 | 52:54:00:aa:bb:14 | fedora | 141 | 100 | dhcp=1ms tftp=0ms http=4ms dns=3ms attest+enroll=121ms 802.1x=10ms | OK |
 
 802.1X: 20 nodes on VLAN 100, 0 on VLAN 666, 0 rejected.
 
-Per-node boot-to-enrolled: p50=63 ms, p95=68 ms, min=42 ms, max=69 ms.
+Per-node boot-to-enrolled: p50=199 ms, p95=275 ms, min=84 ms, max=282 ms.

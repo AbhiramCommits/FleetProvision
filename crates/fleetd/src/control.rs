@@ -1,11 +1,13 @@
 //! Control-plane startup, HTTP routing, and the enrollment/revocation flow.
 
+use crate::audit::AuditLog;
+use crate::auth::{AuthError, JwtValidator, OperatorClaims, Role};
 use crate::metrics::Metrics;
 use crate::store::{NodeRecord, Store};
 use crate::tls::{self, TrustMaterial};
 use crate::ServerArgs;
 use axum::extract::{Path, State};
-use axum::http::{header, StatusCode};
+use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Extension, Json, Router};
@@ -38,6 +40,8 @@ pub struct ControlConfig {
     pub token_key: Option<PathBuf>,
     pub site: String,
     pub policy: PathBuf,
+    pub oidc_issuer: String,
+    pub oidc_audience: String,
 }
 
 impl ControlConfig {
@@ -50,6 +54,8 @@ impl ControlConfig {
             token_key: args.token_key.clone(),
             site: "dc1".into(),
             policy: args.policy.clone(),
+            oidc_issuer: args.oidc_issuer.clone(),
+            oidc_audience: "fleetd".into(),
         }
     }
 }
@@ -70,6 +76,8 @@ pub struct AppState {
     pub challenges: Arc<Mutex<BTreeMap<String, Challenge>>>,
     pub site: String,
     pub policy: Arc<fleet_attest::Policy>,
+    pub auth: Arc<JwtValidator>,
+    pub audit: Arc<std::sync::Mutex<AuditLog>>,
 }
 
 /// A running control plane. Drop the value or call [`shutdown`](Self::shutdown)
@@ -125,17 +133,10 @@ pub async fn start(config: ControlConfig) -> anyhow::Result<RunningControlPlane>
     let mtls_config = tls::mtls_server_config(
         trust.clone(),
         crl.clone(),
-        metrics.clone(),
         server_chain.clone(),
         server_key.clone_key(),
     )?;
-    let operator_config = tls::mtls_server_config(
-        trust.clone(),
-        crl.clone(),
-        metrics.clone(),
-        server_chain.clone(),
-        server_key.clone_key(),
-    )?;
+    let operator_config = tls::server_auth_config(server_chain.clone(), server_key.clone_key())?;
     let enroll_config = tls::server_auth_config(server_chain, server_key)?;
 
     let state = AppState {
@@ -147,6 +148,11 @@ pub async fn start(config: ControlConfig) -> anyhow::Result<RunningControlPlane>
         challenges: Arc::new(Mutex::new(BTreeMap::new())),
         site: config.site.clone(),
         policy,
+        auth: Arc::new(JwtValidator::new(
+            config.oidc_issuer.clone(),
+            config.oidc_audience.clone(),
+        )),
+        audit: Arc::new(std::sync::Mutex::new(AuditLog::open(&config.state_dir)?)),
     };
 
     let mtls_app = node_router(state.clone());
@@ -182,7 +188,7 @@ pub async fn start(config: ControlConfig) -> anyhow::Result<RunningControlPlane>
             operator_listener,
             TlsAcceptor::from(operator_config),
             operator_app,
-            true,
+            false,
             state.metrics.clone(),
             rx,
         )),
@@ -267,6 +273,7 @@ fn operator_router(state: AppState) -> Router {
     Router::new()
         .route("/healthz", get(health))
         .route("/metrics", get(metrics))
+        .route("/v1/auth/session", get(auth_session))
         .route("/v1/tokens", post(create_token))
         .route("/v1/nodes", get(list_nodes))
         .route("/v1/nodes/{node_id}", get(describe_node))
@@ -324,15 +331,32 @@ async fn serve_tls(
                             }
                         }
                         Err(err) => {
-                            if err.to_string().contains("peer sent no certificates") {
-                                metrics.handshake_failure("no_client_cert");
-                            }
+                            metrics.handshake_failure(handshake_reason(&err));
                             warn!(error = %err, "tls handshake rejected");
                         }
                     }
                 });
             }
         }
+    }
+}
+
+fn handshake_reason(err: &std::io::Error) -> &'static str {
+    let text = format!("{err:?}");
+    if text.contains("Revoked") {
+        "revoked"
+    } else if text.contains("ExpiredRevocationList") {
+        "stale_crl"
+    } else if text.contains("InvalidPurpose") {
+        "eku_mismatch"
+    } else if text.contains("Expired") {
+        "cert_expired"
+    } else if text.contains("UnknownIssuer") {
+        "unknown_issuer"
+    } else if text.contains("peer sent no certificates") {
+        "no_client_cert"
+    } else {
+        "tls_error"
     }
 }
 
@@ -355,22 +379,52 @@ fn failure(status: StatusCode, code: &str, message: impl Into<String>) -> ApiFai
     }
 }
 
-fn require_operator(peer: &Option<LeafIdentity>) -> Result<LeafIdentity, ApiFailure> {
-    let identity = peer.clone().ok_or_else(|| {
-        failure(
+async fn authorize(
+    state: &AppState,
+    headers: &HeaderMap,
+    role: Role,
+) -> Result<OperatorClaims, ApiFailure> {
+    match state.auth.authorize(headers, role).await {
+        Ok(claims) => Ok(claims),
+        Err(AuthError::MissingToken) => Err(failure(
             StatusCode::UNAUTHORIZED,
-            "no_identity",
-            "client cert required",
-        )
-    })?;
-    if !identity.node_id.starts_with("operator-") {
+            "missing_token",
+            "operator bearer token required",
+        )),
+        Err(AuthError::Forbidden) => Err(failure(
+            StatusCode::FORBIDDEN,
+            "insufficient_group",
+            "token groups do not permit this operation",
+        )),
+        Err(AuthError::Invalid(reason)) => Err(failure(
+            StatusCode::UNAUTHORIZED,
+            "invalid_token",
+            format!("operator token rejected: {reason}"),
+        )),
+        Err(AuthError::IdpUnavailable(reason)) => Err(failure(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "idp_unavailable",
+            format!("cannot fetch JWKS: {reason}"),
+        )),
+    }
+}
+
+fn reject_operator_bearer(headers: &HeaderMap) -> Result<(), ApiFailure> {
+    if headers.contains_key(header::AUTHORIZATION) {
         return Err(failure(
             StatusCode::FORBIDDEN,
-            "machine_credential",
-            "node certificates cannot call operator endpoints",
+            "operator_credential",
+            "operator bearers cannot call machine enrollment endpoints",
         ));
     }
-    Ok(identity)
+    Ok(())
+}
+
+fn audit_event(state: &AppState, actor: &str, action: &str, subject: &str, detail: &str) {
+    let mut audit = state.audit.lock().expect("audit lock poisoned");
+    if let Err(err) = audit.append(actor, action, subject, detail) {
+        warn!(error = %err, "failed to append audit record");
+    }
 }
 
 fn require_node(peer: &Option<LeafIdentity>, node_id: &str) -> Result<LeafIdentity, ApiFailure> {
@@ -558,9 +612,12 @@ async fn issue_ak(
 
 async fn enroll(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Json(req): Json<EnrollRequest>,
 ) -> Result<Json<EnrollResponse>, ApiFailure> {
     use fleet_proto::NodeState;
+
+    reject_operator_bearer(&headers)?;
 
     if req.node_id.starts_with("operator-") {
         state.metrics.rejection("reserved_identity");
@@ -679,6 +736,20 @@ async fn enroll(
         store.tokens.consume(&payload.id);
         let _ = store.save();
         state.challenges.lock().await.remove(&payload.id);
+        audit_event(
+            &state,
+            &req.node_id,
+            "policy_failure",
+            &req.node_id,
+            &messages.join("; "),
+        );
+        audit_event(
+            &state,
+            &req.node_id,
+            "vlan_assignment",
+            &req.node_id,
+            "vlan=666 source=attestation",
+        );
         warn!(
             node_id = %req.node_id,
             violations = ?messages,
@@ -752,6 +823,20 @@ async fn enroll(
     state.challenges.lock().await.remove(&payload.id);
     drop(store);
     state.metrics.enrollment_ok();
+    audit_event(
+        &state,
+        &req.node_id,
+        "enroll",
+        &req.node_id,
+        &format!("site={} serial={}", req.site, issued.serial_hex),
+    );
+    audit_event(
+        &state,
+        "fleetd",
+        "vlan_assignment",
+        &req.node_id,
+        "vlan=100 source=enrollment",
+    );
     info!(node_id = %req.node_id, serial = %issued.serial_hex, "node enrolled");
     Ok(Json(enroll_response(&state, &req, issued)))
 }
@@ -837,6 +922,13 @@ async fn renew_self(
         ));
     }
     let response = renew_for(&state, &identity.node_id, &req.csr_pem).await?;
+    audit_event(
+        &state,
+        &identity.node_id,
+        "renew",
+        &identity.node_id,
+        &format!("serial={}", response.serial_hex),
+    );
     state.metrics.renewal();
     Ok(Json(response))
 }
@@ -903,12 +995,31 @@ async fn renew_for(
     })
 }
 
+async fn auth_session(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, ApiFailure> {
+    let claims = authorize(&state, &headers, Role::Read).await?;
+    audit_event(
+        &state,
+        &claims.subject,
+        "login",
+        &claims.subject,
+        &format!("groups={}", claims.groups.join(",")),
+    );
+    Ok(Json(serde_json::json!({
+        "subject": claims.subject,
+        "groups": claims.groups,
+        "exp": claims.exp,
+    })))
+}
+
 async fn create_token(
     State(state): State<AppState>,
-    Extension(peer): Extension<Option<LeafIdentity>>,
+    headers: HeaderMap,
     Json(req): Json<CreateTokenRequest>,
 ) -> Result<Json<CreateTokenResponse>, ApiFailure> {
-    require_operator(&peer)?;
+    let claims = authorize(&state, &headers, Role::Admin).await?;
     if req.node_id.starts_with("operator-") {
         return Err(failure(
             StatusCode::BAD_REQUEST,
@@ -926,6 +1037,13 @@ async fn create_token(
             e.to_string(),
         )
     })?;
+    audit_event(
+        &state,
+        &claims.subject,
+        "token_create",
+        &req.node_id,
+        &format!("site={} expires_at={expires_at}", req.site),
+    );
     Ok(Json(CreateTokenResponse {
         token,
         node_id: req.node_id,
@@ -936,9 +1054,9 @@ async fn create_token(
 
 async fn list_nodes(
     State(state): State<AppState>,
-    Extension(peer): Extension<Option<LeafIdentity>>,
+    headers: HeaderMap,
 ) -> Result<Json<NodesResponse>, ApiFailure> {
-    require_operator(&peer)?;
+    authorize(&state, &headers, Role::Read).await?;
     let store = state.store.lock().await;
     let nodes = store.list();
     Ok(Json(NodesResponse {
@@ -949,10 +1067,10 @@ async fn list_nodes(
 
 async fn describe_node(
     State(state): State<AppState>,
-    Extension(peer): Extension<Option<LeafIdentity>>,
+    headers: HeaderMap,
     Path(node_id): Path<String>,
 ) -> Result<Json<NodeSummary>, ApiFailure> {
-    require_operator(&peer)?;
+    authorize(&state, &headers, Role::Read).await?;
     let store = state.store.lock().await;
     store
         .get(&node_id)
@@ -962,11 +1080,11 @@ async fn describe_node(
 
 async fn revoke_node(
     State(state): State<AppState>,
-    Extension(peer): Extension<Option<LeafIdentity>>,
+    headers: HeaderMap,
     Path(node_id): Path<String>,
     Json(req): Json<RevokeRequest>,
 ) -> Result<Json<NodeSummary>, ApiFailure> {
-    require_operator(&peer)?;
+    let claims = authorize(&state, &headers, Role::Admin).await?;
     let mut store = state.store.lock().await;
     let mut record = store
         .get(&node_id)
@@ -987,18 +1105,32 @@ async fn revoke_node(
     store
         .upsert(record.clone())
         .map_err(|e| failure(StatusCode::CONFLICT, "state", e.to_string()))?;
+    audit_event(
+        &state,
+        &claims.subject,
+        "revoke",
+        &node_id,
+        &format!("reason={}", req.reason),
+    );
     info!(node_id = %node_id, reason = %req.reason, "node revoked");
     Ok(Json(record.summary()))
 }
 
 async fn renew_node_admin(
     State(state): State<AppState>,
-    Extension(peer): Extension<Option<LeafIdentity>>,
+    headers: HeaderMap,
     Path(node_id): Path<String>,
     Json(req): Json<RenewRequest>,
 ) -> Result<Json<EnrollResponse>, ApiFailure> {
-    require_operator(&peer)?;
+    let claims = authorize(&state, &headers, Role::Admin).await?;
     let response = renew_for(&state, &node_id, &req.csr_pem).await?;
+    audit_event(
+        &state,
+        &claims.subject,
+        "renew",
+        &node_id,
+        &format!("serial={}", response.serial_hex),
+    );
     state.metrics.renewal();
     Ok(Json(response))
 }
@@ -1028,33 +1160,13 @@ mod tests {
     }
 
     #[test]
-    fn operator_and_node_credentials_are_separated() {
-        let operator = LeafIdentity {
-            node_id: "operator-admin".into(),
-            site: "dc1".into(),
-            hostname: "operator-admin".into(),
-            dns_name: "operator-admin.fleet.internal".into(),
-            uri: "fleet://dc1/operator-admin".into(),
-            serial_hex: "01".into(),
-            not_before: 0,
-            not_after: 0,
-            usage: LeafUsage::Client,
-        };
-        assert!(require_operator(&Some(operator.clone())).is_ok());
-        assert!(require_node(&Some(operator), "n1").is_err());
-
-        let node = LeafIdentity {
-            node_id: "n1".into(),
-            site: "dc1".into(),
-            hostname: "n1".into(),
-            dns_name: "n1.fleet.internal".into(),
-            uri: "fleet://dc1/n1".into(),
-            serial_hex: "02".into(),
-            not_before: 0,
-            not_after: 0,
-            usage: LeafUsage::Client,
-        };
-        assert!(require_node(&Some(node.clone()), "n1").is_ok());
-        assert!(require_operator(&Some(node)).is_err());
+    fn operator_bearer_is_refused_on_machine_endpoints() {
+        let mut headers = HeaderMap::new();
+        assert!(reject_operator_bearer(&headers).is_ok());
+        headers.insert(
+            header::AUTHORIZATION,
+            "Bearer operator-token".parse().unwrap(),
+        );
+        assert!(reject_operator_bearer(&headers).is_err());
     }
 }

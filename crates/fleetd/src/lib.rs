@@ -11,8 +11,12 @@
 //! are rejected on node endpoints. Both checks are asserted in tests.
 
 pub mod agent;
+pub mod audit;
+pub mod auth;
 pub mod control;
+pub mod idp;
 pub mod metrics;
+pub mod saml;
 pub mod store;
 pub mod tls;
 pub mod tokens;

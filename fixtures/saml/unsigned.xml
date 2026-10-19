@@ -1,0 +1,21 @@
+<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" Destination="https://127.0.0.1:9443/v1/saml/acs" ID="_resp-unsigned" InResponseTo="req-abc123" IssueInstant="2026-01-01T00:00:00Z" Version="2.0">
+  <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://idp.fleet.internal</saml:Issuer>
+  <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_assert-unsigned" IssueInstant="2026-01-01T00:00:00Z" Version="2.0">
+  <saml:Issuer>https://idp.fleet.internal</saml:Issuer>
+  <saml:Subject>
+    <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">alice@fleet.internal</saml:NameID>
+    <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+      <saml:SubjectConfirmationData NotOnOrAfter="2035-01-01T00:00:00Z" Recipient="https://127.0.0.1:9443/v1/saml/acs" InResponseTo="req-abc123"/>
+    </saml:SubjectConfirmation>
+  </saml:Subject>
+  <saml:Conditions NotBefore="2020-01-01T00:00:00Z" NotOnOrAfter="2035-01-01T00:00:00Z">
+    <saml:AudienceRestriction><saml:Audience>fleetd</saml:Audience></saml:AudienceRestriction>
+  </saml:Conditions>
+  <saml:AuthnStatement AuthnInstant="2026-01-01T00:00:00Z" SessionIndex="_session-1">
+    <saml:AuthnContext><saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef></saml:AuthnContext>
+  </saml:AuthnStatement>
+  <saml:AttributeStatement>
+    <saml:Attribute Name="groups" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue>fleet-admin</saml:AttributeValue></saml:Attribute>
+  </saml:AttributeStatement>
+</saml:Assertion>
+</samlp:Response>

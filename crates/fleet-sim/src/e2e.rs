@@ -67,6 +67,7 @@ pub async fn run(nodes: usize) -> anyhow::Result<E2eReport> {
     let ca_path = dir.path().join("ca.pem");
     std::fs::write(&ca_path, &ca_pem)?;
 
+    let idp = fleetd::idp::start().await?;
     let running = start(ControlConfig {
         state_dir: state_dir.clone(),
         listen: "127.0.0.1:0".parse()?,
@@ -75,6 +76,8 @@ pub async fn run(nodes: usize) -> anyhow::Result<E2eReport> {
         token_key: None,
         site: "dc1".into(),
         policy: policy_path(),
+        oidc_issuer: idp.issuer.clone(),
+        oidc_audience: "fleetd".into(),
     })
     .await
     .context("starting in-process fleetd")?;
@@ -127,6 +130,7 @@ pub async fn run(nodes: usize) -> anyhow::Result<E2eReport> {
         crl: running.state.crl.clone(),
         attestations: attestations.clone(),
         clock_offset_seconds: 0,
+        audit: Some(running.state.audit.clone()),
     })
     .await?;
 
@@ -204,6 +208,7 @@ pub async fn run(nodes: usize) -> anyhow::Result<E2eReport> {
     tftp.shutdown().await;
     dhcp.shutdown().await;
     running.shutdown().await;
+    idp.shutdown().await;
 
     Ok(E2eReport {
         nodes_requested: nodes,

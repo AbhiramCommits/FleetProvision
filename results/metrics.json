@@ -1,0 +1,4374 @@
+{
+  "generated_at": "2026-10-19 20:51:52.662618 +00:00:00",
+  "machine": {
+    "os": "Darwin 27.0.0",
+    "arch": "aarch64",
+    "cpu": "Apple M3",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "terraform": "Terraform v1.16.5\non darwin_arm64\n\nYour version of Terraform is out of date! The latest version\nis 1.16.6. You can update by downloading from https://developer.hashicorp.com/terraform/install",
+    "packer": "Packer v1.16.1",
+    "ansible_lint": "ansible-lint 26.10.1 using ansible-core:2.21.5 ansible-compat:26.10.0 ruamel-yaml:0.19.1"
+  },
+  "ca_issuance": {
+    "certificates": 1000,
+    "total_ms": 838.45,
+    "throughput_per_sec": 1192.68,
+    "latency": {
+      "count": 1000,
+      "p50_ms": 0.17,
+      "p95_ms": 0.69,
+      "p99_ms": 8.6,
+      "max_ms": 42.89
+    }
+  },
+  "mtls": {
+    "handshakes": 500,
+    "latency": {
+      "count": 500,
+      "p50_ms": 1.34,
+      "p95_ms": 3.83,
+      "p99_ms": 7.24,
+      "max_ms": 14.21
+    },
+    "revoked_attempts": 100,
+    "revoked_latency": {
+      "count": 100,
+      "p50_ms": 2.07,
+      "p95_ms": 11.02,
+      "p99_ms": 16.81,
+      "max_ms": 23.69
+    },
+    "rejected_handshakes": 100
+  },
+  "enrollment_20": {
+    "nodes": 20,
+    "wall_ms": 738,
+    "nodes_per_sec": 27.1,
+    "per_node_ms": {
+      "count": 20,
+      "p50_ms": 174.0,
+      "p95_ms": 272.0,
+      "p99_ms": 285.0,
+      "max_ms": 285.0
+    },
+    "success_count": 20
+  },
+  "enrollment_100": {
+    "nodes": 100,
+    "wall_ms": 1600,
+    "nodes_per_sec": 62.5,
+    "per_node_ms": {
+      "count": 100,
+      "p50_ms": 861.0,
+      "p95_ms": 1346.0,
+      "p99_ms": 1383.0,
+      "max_ms": 1390.0
+    },
+    "success_count": 100
+  },
+  "attestation": {
+    "evaluations": 1000,
+    "latency": {
+      "count": 1000,
+      "p50_ms": 0.59,
+      "p95_ms": 0.77,
+      "p99_ms": 0.97,
+      "max_ms": 2.89
+    },
+    "fixtures_passed": 2,
+    "fixtures_failed": 7,
+    "pass_fail": {
+      "fedora-good.json": "PASS",
+      "forged-quote.json": "forged_quote",
+      "log-quote-mismatch.json": "log_quote_mismatch",
+      "replayed-nonce.json": "replayed_nonce",
+      "secureboot-off.json": "secure_boot_disabled",
+      "setup-mode-on.json": "setup_mode_enabled",
+      "tampered-shim.json": "pcr_not_allowed",
+      "ubuntu-good.json": "PASS",
+      "unknown-firmware.json": "pcr_not_allowed"
+    }
+  },
+  "provisioning_20": {
+    "nodes_requested": 20,
+    "success_count": 20,
+    "failure_count": 0,
+    "vlan_100": 20,
+    "vlan_666": 0,
+    "rejected": 0,
+    "wall_millis": 339,
+    "per_node": [
+      {
+        "node_id": "rack-a-node-001",
+        "mac": "52:54:00:aa:bb:01",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 49,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 39
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-002",
+        "mac": "52:54:00:aa:bb:02",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 39,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 28
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-003",
+        "mac": "52:54:00:aa:bb:03",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 136,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 124
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-004",
+        "mac": "52:54:00:aa:bb:04",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 101,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 89
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-005",
+        "mac": "52:54:00:aa:bb:05",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 71,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 58
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-006",
+        "mac": "52:54:00:aa:bb:06",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 31,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 18
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-007",
+        "mac": "52:54:00:aa:bb:07",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 74,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 68
+          },
+          {
+            "stage": "802.1x",
+            "millis": 1
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-008",
+        "mac": "52:54:00:aa:bb:08",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 195,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 182
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-009",
+        "mac": "52:54:00:aa:bb:09",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 127,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 114
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-010",
+        "mac": "52:54:00:aa:bb:0a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 61,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 45
+          },
+          {
+            "stage": "802.1x",
+            "millis": 11
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-011",
+        "mac": "52:54:00:aa:bb:0b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 206,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 3
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 197
+          },
+          {
+            "stage": "802.1x",
+            "millis": 2
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-012",
+        "mac": "52:54:00:aa:bb:0c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 92,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 78
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-013",
+        "mac": "52:54:00:aa:bb:0d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 108,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 100
+          },
+          {
+            "stage": "802.1x",
+            "millis": 3
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-014",
+        "mac": "52:54:00:aa:bb:0e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 117,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 104
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-015",
+        "mac": "52:54:00:aa:bb:0f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 158,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 147
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-016",
+        "mac": "52:54:00:aa:bb:10",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 185,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 172
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-017",
+        "mac": "52:54:00:aa:bb:11",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 148,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 3
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 137
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-018",
+        "mac": "52:54:00:aa:bb:12",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 176,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 3
+          },
+          {
+            "stage": "dns",
+            "millis": 0
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 162
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-019",
+        "mac": "52:54:00:aa:bb:13",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 202,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 3
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 194
+          },
+          {
+            "stage": "802.1x",
+            "millis": 2
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-020",
+        "mac": "52:54:00:aa:bb:14",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 163,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 2
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 153
+          },
+          {
+            "stage": "802.1x",
+            "millis": 4
+          }
+        ],
+        "error": null
+      }
+    ]
+  },
+  "provisioning_100": {
+    "nodes_requested": 100,
+    "success_count": 100,
+    "failure_count": 0,
+    "vlan_100": 100,
+    "vlan_666": 0,
+    "rejected": 0,
+    "wall_millis": 1268,
+    "per_node": [
+      {
+        "node_id": "rack-a-node-001",
+        "mac": "52:54:00:aa:bb:01",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 41,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 7
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 28
+          },
+          {
+            "stage": "802.1x",
+            "millis": 1
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-002",
+        "mac": "52:54:00:aa:bb:02",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 119,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 95
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-003",
+        "mac": "52:54:00:aa:bb:03",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 151,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 131
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-004",
+        "mac": "52:54:00:aa:bb:04",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 138,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 116
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-005",
+        "mac": "52:54:00:aa:bb:05",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 523,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 497
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-006",
+        "mac": "52:54:00:aa:bb:06",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 130,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 106
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-007",
+        "mac": "52:54:00:aa:bb:07",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 226,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 202
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-008",
+        "mac": "52:54:00:aa:bb:08",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 238,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 8
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 215
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-009",
+        "mac": "52:54:00:aa:bb:09",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 107,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 80
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-010",
+        "mac": "52:54:00:aa:bb:0a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 282,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 260
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-011",
+        "mac": "52:54:00:aa:bb:0b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 491,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 463
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-012",
+        "mac": "52:54:00:aa:bb:0c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 87,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 0
+          },
+          {
+            "stage": "http",
+            "millis": 8
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 72
+          },
+          {
+            "stage": "802.1x",
+            "millis": 1
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-013",
+        "mac": "52:54:00:aa:bb:0d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 170,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 148
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-014",
+        "mac": "52:54:00:aa:bb:0e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 186,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 158
+          },
+          {
+            "stage": "802.1x",
+            "millis": 12
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-015",
+        "mac": "52:54:00:aa:bb:0f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 54,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 38
+          },
+          {
+            "stage": "802.1x",
+            "millis": 1
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-016",
+        "mac": "52:54:00:aa:bb:10",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 514,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 481
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-017",
+        "mac": "52:54:00:aa:bb:11",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 374,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 344
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-018",
+        "mac": "52:54:00:aa:bb:12",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 213,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 186
+          },
+          {
+            "stage": "802.1x",
+            "millis": 11
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-019",
+        "mac": "52:54:00:aa:bb:13",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 452,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 432
+          },
+          {
+            "stage": "802.1x",
+            "millis": 4
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-020",
+        "mac": "52:54:00:aa:bb:14",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 265,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 246
+          },
+          {
+            "stage": "802.1x",
+            "millis": 3
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-021",
+        "mac": "52:54:00:aa:bb:15",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 158,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 135
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-022",
+        "mac": "52:54:00:aa:bb:16",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 196,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 170
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-023",
+        "mac": "52:54:00:aa:bb:17",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 403,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 378
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-024",
+        "mac": "52:54:00:aa:bb:18",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 84,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 8
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 55
+          },
+          {
+            "stage": "802.1x",
+            "millis": 11
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-025",
+        "mac": "52:54:00:aa:bb:19",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 414,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 385
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-026",
+        "mac": "52:54:00:aa:bb:1a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 385,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 355
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-027",
+        "mac": "52:54:00:aa:bb:1b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 473,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 442
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-028",
+        "mac": "52:54:00:aa:bb:1c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 577,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 0
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 8
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 545
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-029",
+        "mac": "52:54:00:aa:bb:1d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 417,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 395
+          },
+          {
+            "stage": "802.1x",
+            "millis": 1
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-030",
+        "mac": "52:54:00:aa:bb:1e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 558,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 526
+          },
+          {
+            "stage": "802.1x",
+            "millis": 4
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-031",
+        "mac": "52:54:00:aa:bb:1f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 393,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 9
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 368
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-032",
+        "mac": "52:54:00:aa:bb:20",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 274,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 246
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-033",
+        "mac": "52:54:00:aa:bb:21",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 438,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 413
+          },
+          {
+            "stage": "802.1x",
+            "millis": 2
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-034",
+        "mac": "52:54:00:aa:bb:22",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 361,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 1
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 337
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-035",
+        "mac": "52:54:00:aa:bb:23",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 435,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 415
+          },
+          {
+            "stage": "802.1x",
+            "millis": 1
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-036",
+        "mac": "52:54:00:aa:bb:24",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 502,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 472
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-037",
+        "mac": "52:54:00:aa:bb:25",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 483,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 452
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-038",
+        "mac": "52:54:00:aa:bb:26",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 540,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 514
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-039",
+        "mac": "52:54:00:aa:bb:27",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 530,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 503
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-040",
+        "mac": "52:54:00:aa:bb:28",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 465,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 436
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-041",
+        "mac": "52:54:00:aa:bb:29",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 671,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 639
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-042",
+        "mac": "52:54:00:aa:bb:2a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 991,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 2
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 7
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 955
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-043",
+        "mac": "52:54:00:aa:bb:2b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 833,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 800
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-044",
+        "mac": "52:54:00:aa:bb:2c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 703,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 7
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 667
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-045",
+        "mac": "52:54:00:aa:bb:2d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 246,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 220
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-046",
+        "mac": "52:54:00:aa:bb:2e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 813,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 7
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 776
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-047",
+        "mac": "52:54:00:aa:bb:2f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 690,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 656
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-048",
+        "mac": "52:54:00:aa:bb:30",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 764,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 732
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-049",
+        "mac": "52:54:00:aa:bb:31",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 549,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 514
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-050",
+        "mac": "52:54:00:aa:bb:32",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 773,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 2
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 737
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-051",
+        "mac": "52:54:00:aa:bb:33",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 875,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 1
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 840
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-052",
+        "mac": "52:54:00:aa:bb:34",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 862,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 1
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 8
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 827
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-053",
+        "mac": "52:54:00:aa:bb:35",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 897,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 860
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-054",
+        "mac": "52:54:00:aa:bb:36",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 853,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 817
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-055",
+        "mac": "52:54:00:aa:bb:37",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 720,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 682
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-056",
+        "mac": "52:54:00:aa:bb:38",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 982,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 942
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-057",
+        "mac": "52:54:00:aa:bb:39",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 566,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 532
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-058",
+        "mac": "52:54:00:aa:bb:3a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 739,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 702
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-059",
+        "mac": "52:54:00:aa:bb:3b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 932,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 892
+          },
+          {
+            "stage": "802.1x",
+            "millis": 11
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-060",
+        "mac": "52:54:00:aa:bb:3c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 940,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 906
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-061",
+        "mac": "52:54:00:aa:bb:3d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 947,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 18
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 914
+          },
+          {
+            "stage": "802.1x",
+            "millis": 3
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-062",
+        "mac": "52:54:00:aa:bb:3e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 752,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 717
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-063",
+        "mac": "52:54:00:aa:bb:3f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 634,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 596
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-064",
+        "mac": "52:54:00:aa:bb:40",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 970,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 933
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-065",
+        "mac": "52:54:00:aa:bb:41",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 957,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 922
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-066",
+        "mac": "52:54:00:aa:bb:42",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 788,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 7
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 747
+          },
+          {
+            "stage": "802.1x",
+            "millis": 11
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-067",
+        "mac": "52:54:00:aa:bb:43",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 659,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 629
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-068",
+        "mac": "52:54:00:aa:bb:44",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 818,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 787
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-069",
+        "mac": "52:54:00:aa:bb:45",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 615,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 19
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 581
+          },
+          {
+            "stage": "802.1x",
+            "millis": 4
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-070",
+        "mac": "52:54:00:aa:bb:46",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 587,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 547
+          },
+          {
+            "stage": "802.1x",
+            "millis": 11
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-071",
+        "mac": "52:54:00:aa:bb:47",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1094,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 18
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1053
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-072",
+        "mac": "52:54:00:aa:bb:48",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1124,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 4
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 20
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1084
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-073",
+        "mac": "52:54:00:aa:bb:49",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 603,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 572
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-074",
+        "mac": "52:54:00:aa:bb:4a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1041,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1008
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-075",
+        "mac": "52:54:00:aa:bb:4b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1135,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 19
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1092
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-076",
+        "mac": "52:54:00:aa:bb:4c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1083,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 18
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1043
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-077",
+        "mac": "52:54:00:aa:bb:4d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1051,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1011
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-078",
+        "mac": "52:54:00:aa:bb:4e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1027,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 993
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-079",
+        "mac": "52:54:00:aa:bb:4f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 596,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 7
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 558
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-080",
+        "mac": "52:54:00:aa:bb:50",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1108,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 19
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1073
+          },
+          {
+            "stage": "802.1x",
+            "millis": 4
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-081",
+        "mac": "52:54:00:aa:bb:51",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 885,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 2
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 13
+          },
+          {
+            "stage": "dns",
+            "millis": 7
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 846
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-082",
+        "mac": "52:54:00:aa:bb:52",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1011,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 2
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 974
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-083",
+        "mac": "52:54:00:aa:bb:53",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1061,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1021
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-084",
+        "mac": "52:54:00:aa:bb:54",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 641,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 2
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 605
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-085",
+        "mac": "52:54:00:aa:bb:55",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 680,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 10
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 645
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-086",
+        "mac": "52:54:00:aa:bb:56",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 840,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 2
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 805
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-087",
+        "mac": "52:54:00:aa:bb:57",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 708,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 673
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-088",
+        "mac": "52:54:00:aa:bb:58",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1001,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 11
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 964
+          },
+          {
+            "stage": "802.1x",
+            "millis": 9
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-089",
+        "mac": "52:54:00:aa:bb:59",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 623,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 5
+          },
+          {
+            "stage": "http",
+            "millis": 12
+          },
+          {
+            "stage": "dns",
+            "millis": 6
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 588
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-090",
+        "mac": "52:54:00:aa:bb:5a",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 917,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 3
+          },
+          {
+            "stage": "http",
+            "millis": 15
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 885
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-091",
+        "mac": "52:54:00:aa:bb:5b",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1170,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 18
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1132
+          },
+          {
+            "stage": "802.1x",
+            "millis": 4
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-092",
+        "mac": "52:54:00:aa:bb:5c",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1161,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 18
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1123
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-093",
+        "mac": "52:54:00:aa:bb:5d",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 726,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 14
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 691
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-094",
+        "mac": "52:54:00:aa:bb:5e",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 800,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 4
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 760
+          },
+          {
+            "stage": "802.1x",
+            "millis": 10
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-095",
+        "mac": "52:54:00:aa:bb:5f",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1102,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1064
+          },
+          {
+            "stage": "802.1x",
+            "millis": 7
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-096",
+        "mac": "52:54:00:aa:bb:60",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1145,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 18
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1104
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-097",
+        "mac": "52:54:00:aa:bb:61",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1152,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 5
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1114
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-098",
+        "mac": "52:54:00:aa:bb:62",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 1018,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 4
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 983
+          },
+          {
+            "stage": "802.1x",
+            "millis": 6
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-099",
+        "mac": "52:54:00:aa:bb:63",
+        "distro": "ubuntu",
+        "success": true,
+        "total_millis": 1068,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 17
+          },
+          {
+            "stage": "dns",
+            "millis": 4
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 1031
+          },
+          {
+            "stage": "802.1x",
+            "millis": 5
+          }
+        ],
+        "error": null
+      },
+      {
+        "node_id": "rack-a-node-100",
+        "mac": "52:54:00:aa:bb:64",
+        "distro": "fedora",
+        "success": true,
+        "total_millis": 904,
+        "vlan": 100,
+        "stages": [
+          {
+            "stage": "dhcp",
+            "millis": 3
+          },
+          {
+            "stage": "tftp",
+            "millis": 6
+          },
+          {
+            "stage": "http",
+            "millis": 16
+          },
+          {
+            "stage": "dns",
+            "millis": 3
+          },
+          {
+            "stage": "attest+enroll",
+            "millis": 867
+          },
+          {
+            "stage": "802.1x",
+            "millis": 8
+          }
+        ],
+        "error": null
+      }
+    ]
+  },
+  "dot1x": {
+    "authorized_vlan_100": 1,
+    "quarantined_vlan_666": 1,
+    "rejected": 1,
+    "latency": {
+      "count": 3,
+      "p50_ms": 1.7,
+      "p95_ms": 1.87,
+      "p99_ms": 1.87,
+      "max_ms": 1.87
+    }
+  },
+  "failure_injection": {
+    "scenarios": 6,
+    "failed_closed": 6,
+    "details": [
+      {
+        "scenario": "dhcp unknown MAC",
+        "expected": "NAK",
+        "observed": "DHCP NAK: unknown mac",
+        "failed_closed": true
+      },
+      {
+        "scenario": "tftp file not found",
+        "expected": "ERROR code 1",
+        "observed": "TFTP file not found: File not found",
+        "failed_closed": true
+      },
+      {
+        "scenario": "http 404 kickstart",
+        "expected": "404",
+        "observed": "HTTP 404 for /kickstart/missing.ks",
+        "failed_closed": true
+      },
+      {
+        "scenario": "truncated TLS handshake",
+        "expected": "server stays up and counts a handshake failure",
+        "observed": "healthz_ok=true handshake_failures=1",
+        "failed_closed": true
+      },
+      {
+        "scenario": "expired CRL",
+        "expected": "stale_crl rejection",
+        "observed": "Rejected { reason: \"stale_crl\" }",
+        "failed_closed": true
+      },
+      {
+        "scenario": "revoked supplicant",
+        "expected": "revoked rejection",
+        "observed": "Rejected { reason: \"revoked\" }",
+        "failed_closed": true
+      }
+    ]
+  },
+  "totals": {
+    "tests": 117,
+    "terraform_resources_planned": 27,
+    "modules_validated": 5,
+    "fixtures": 9
+  }
+}

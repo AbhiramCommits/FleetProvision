@@ -59,6 +59,8 @@ pub struct Dot1xConfig {
     /// Added to the wall clock when checking CRL freshness (test hook for
     /// simulating an expired CRL without waiting).
     pub clock_offset_seconds: i64,
+    /// Optional hash-chained audit log for VLAN assignments.
+    pub audit: Option<Arc<std::sync::Mutex<fleetd::audit::AuditLog>>>,
 }
 
 pub struct RunningDot1x {
@@ -223,6 +225,7 @@ async fn handle_supplicant(
     match verdict {
         Some(true) => {
             write_msg(&mut writer, &ServerMsg::EapSuccess { vlan: VLAN_PROD }).await?;
+            audit_vlan(&config, &node_id, VLAN_PROD);
             Ok(Dot1xOutcome::Authorized { vlan: VLAN_PROD })
         }
         Some(false) => {
@@ -233,11 +236,24 @@ async fn handle_supplicant(
                 },
             )
             .await?;
+            audit_vlan(&config, &node_id, VLAN_QUARANTINE);
             Ok(Dot1xOutcome::Authorized {
                 vlan: VLAN_QUARANTINE,
             })
         }
         None => reject(&mut writer, "unknown_attestation").await,
+    }
+}
+
+fn audit_vlan(config: &Dot1xConfig, node_id: &str, vlan: u16) {
+    if let Some(audit) = &config.audit {
+        let mut audit = audit.lock().expect("audit lock poisoned");
+        let _ = audit.append(
+            "dot1x",
+            "vlan_assignment",
+            node_id,
+            &format!("vlan={vlan} source=802.1x"),
+        );
     }
 }
 
@@ -360,6 +376,7 @@ mod tests {
             crl,
             attestations: Arc::new(RwLock::new(attestations)),
             clock_offset_seconds: 0,
+            audit: None,
         })
         .await
         .unwrap();
@@ -398,6 +415,7 @@ mod tests {
             crl: Arc::new(RwLock::new(ca.crl_store().unwrap())),
             attestations: Arc::new(RwLock::new(attestations)),
             clock_offset_seconds: 0,
+            audit: None,
         })
         .await
         .unwrap();
@@ -430,6 +448,7 @@ mod tests {
             crl: Arc::new(RwLock::new(ca.crl_store().unwrap())),
             attestations: Arc::new(RwLock::new(attestations)),
             clock_offset_seconds: 0,
+            audit: None,
         })
         .await
         .unwrap();
@@ -462,6 +481,7 @@ mod tests {
             crl: Arc::new(RwLock::new(ca.crl_store().unwrap())),
             attestations: Arc::new(RwLock::new(attestations)),
             clock_offset_seconds: 0,
+            audit: None,
         })
         .await
         .unwrap();
@@ -496,6 +516,7 @@ mod tests {
             crl: Arc::new(RwLock::new(ca.crl_store().unwrap())),
             attestations: Arc::new(RwLock::new(attestations)),
             clock_offset_seconds: 0,
+            audit: None,
         })
         .await
         .unwrap();
@@ -525,6 +546,7 @@ mod tests {
             crl: Arc::new(RwLock::new(ca.crl_store().unwrap())),
             attestations: Arc::new(RwLock::new(HashMap::new())),
             clock_offset_seconds: 0,
+            audit: None,
         })
         .await
         .unwrap();

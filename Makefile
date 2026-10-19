@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-export PATH := $(CURDIR)/.tools:$(PATH)
+export PATH := $(CURDIR)/.tools:$(CURDIR)/.venv-tools/bin:$(PATH)
 CARGO ?= cargo
 PYTHON ?= python3
 TERRAFORM ?= terraform

@@ -9,9 +9,11 @@ license.workspace = true
 anyhow.workspace = true
 clap.workspace = true
 fleet-attest = { path = "../fleet-attest" }
+fleetd = { path = "../fleetd" }
 fleet-pki = { path = "../fleet-pki" }
 fleet-proto = { path = "../fleet-proto" }
 hex.workspace = true
+rand.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true

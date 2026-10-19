@@ -1,3 +1,4 @@
+mod bench;
 mod dot1x;
 mod e2e;
 mod net;
@@ -102,10 +103,22 @@ async fn main() -> anyhow::Result<()> {
             }
             Ok(())
         }
-        Command::Bench { out } => anyhow::bail!(
-            "bench harness not available in this build (output {})",
-            out.display()
-        ),
+        Command::Bench { out } => {
+            let metrics = bench::run(&out).await?;
+            println!(
+                "bench complete: {} certs, {} mTLS handshakes, {} failure scenarios, {} tests",
+                metrics.ca_issuance.certificates,
+                metrics.mtls.handshakes,
+                metrics.failure_injection.scenarios,
+                metrics.totals.tests
+            );
+            println!(
+                "wrote {}/metrics.json and {}/REPORT.md",
+                out.display(),
+                out.display()
+            );
+            Ok(())
+        }
         Command::GenFixtures { out } => {
             let policy = std::path::Path::new("policy/boot-integrity.yaml");
             let written = fleet_attest::fixtures::generate(&out, policy)?;
@@ -136,7 +149,19 @@ async fn main() -> anyhow::Result<()> {
             }
             Ok(())
         }
-        Command::Idp { listen } => anyhow::bail!("mock IdP not available in this build ({listen})"),
+        Command::Idp { listen } => {
+            let addr: std::net::SocketAddr = listen.parse()?;
+            let idp = fleetd::idp::start_at(addr).await?;
+            println!("mock OIDC IdP listening at {}", idp.issuer);
+            println!(
+                "  discovery: {}/.well-known/openid-configuration",
+                idp.issuer
+            );
+            println!("  jwks:      {}/jwks", idp.issuer);
+            tokio::signal::ctrl_c().await?;
+            idp.shutdown().await;
+            Ok(())
+        }
     }
 }
 

@@ -3,7 +3,6 @@
 //! The verifier performs three checks on every handshake: chain validity
 //! against the fleet root, EKU clientAuth, and CRL freshness plus revocation.
 
-use crate::metrics::Metrics;
 use fleet_pki::{CrlStore, LeafIdentity, PkiError};
 use rustls::client::danger::HandshakeSignatureValid;
 use rustls::pki_types::{CertificateDer, UnixTime};
@@ -53,7 +52,6 @@ pub fn pem_private_key(pem: &str) -> Result<rustls::pki_types::PrivateKeyDer<'st
 pub struct FleetClientVerifier {
     trust: Arc<TrustMaterial>,
     crl: Arc<RwLock<CrlStore>>,
-    metrics: Arc<Metrics>,
     hints: Vec<DistinguishedName>,
     provider: Arc<rustls::crypto::CryptoProvider>,
 }
@@ -62,13 +60,11 @@ impl FleetClientVerifier {
     pub fn new(
         trust: Arc<TrustMaterial>,
         crl: Arc<RwLock<CrlStore>>,
-        metrics: Arc<Metrics>,
         provider: Arc<rustls::crypto::CryptoProvider>,
     ) -> Self {
         Self {
             trust,
             crl,
-            metrics,
             hints: Vec::new(),
             provider,
         }
@@ -97,14 +93,12 @@ impl ClientCertVerifier for FleetClientVerifier {
         let leaf = match webpki::EndEntityCert::try_from(end_entity) {
             Ok(cert) => cert,
             Err(_) => {
-                self.metrics.handshake_failure("bad_encoding");
                 return Err(TlsError::InvalidCertificate(CertificateError::BadEncoding));
             }
         };
         let anchor = match webpki::anchor_from_trusted_cert(&self.trust.root_der) {
             Ok(anchor) => anchor,
             Err(_) => {
-                self.metrics.handshake_failure("bad_trust_anchor");
                 return Err(TlsError::InvalidCertificate(CertificateError::BadEncoding));
             }
         };
@@ -120,30 +114,21 @@ impl ClientCertVerifier for FleetClientVerifier {
             None,
             None,
         ) {
-            let (reason, cert_error) = match err {
-                webpki::Error::CertExpired { .. } => ("cert_expired", CertificateError::Expired),
-                webpki::Error::CertNotValidYet { .. } => {
-                    ("cert_not_yet_valid", CertificateError::NotValidYet)
-                }
-                webpki::Error::RequiredEkuNotFoundContext(_) => {
-                    ("eku_mismatch", CertificateError::InvalidPurpose)
-                }
-                webpki::Error::UnknownIssuer => ("unknown_issuer", CertificateError::UnknownIssuer),
-                _ => (
-                    "chain_invalid",
-                    CertificateError::Other(rustls::OtherError(Arc::new(std::io::Error::other(
-                        err.to_string(),
-                    )))),
-                ),
+            let cert_error = match err {
+                webpki::Error::CertExpired { .. } => CertificateError::Expired,
+                webpki::Error::CertNotValidYet { .. } => CertificateError::NotValidYet,
+                webpki::Error::RequiredEkuNotFoundContext(_) => CertificateError::InvalidPurpose,
+                webpki::Error::UnknownIssuer => CertificateError::UnknownIssuer,
+                _ => CertificateError::Other(rustls::OtherError(Arc::new(std::io::Error::other(
+                    err.to_string(),
+                )))),
             };
-            self.metrics.handshake_failure(reason);
             return Err(TlsError::InvalidCertificate(cert_error));
         }
 
         let identity = match fleet_pki::peer_identity(end_entity.as_ref()) {
             Ok(identity) => identity,
             Err(_) => {
-                self.metrics.handshake_failure("missing_identity");
                 return Err(TlsError::InvalidCertificate(CertificateError::BadEncoding));
             }
         };
@@ -151,22 +136,15 @@ impl ClientCertVerifier for FleetClientVerifier {
         let now_secs = now.as_secs() as i64;
         match crl.check(&identity.serial_hex, now_secs) {
             Ok(()) => Ok(ClientCertVerified::assertion()),
-            Err(PkiError::StaleCrl { .. }) => {
-                self.metrics.handshake_failure("stale_crl");
-                Err(TlsError::InvalidCertificate(
-                    CertificateError::ExpiredRevocationList,
-                ))
-            }
+            Err(PkiError::StaleCrl { .. }) => Err(TlsError::InvalidCertificate(
+                CertificateError::ExpiredRevocationList,
+            )),
             Err(PkiError::Revoked(_)) => {
-                self.metrics.handshake_failure("revoked");
                 Err(TlsError::InvalidCertificate(CertificateError::Revoked))
             }
-            Err(_) => {
-                self.metrics.handshake_failure("crl_error");
-                Err(TlsError::InvalidCertificate(
-                    CertificateError::UnknownRevocationStatus,
-                ))
-            }
+            Err(_) => Err(TlsError::InvalidCertificate(
+                CertificateError::UnknownRevocationStatus,
+            )),
         }
     }
 
@@ -208,14 +186,13 @@ impl ClientCertVerifier for FleetClientVerifier {
 pub fn mtls_server_config(
     trust: Arc<TrustMaterial>,
     crl: Arc<RwLock<CrlStore>>,
-    metrics: Arc<Metrics>,
     chain: Vec<CertificateDer<'static>>,
     key: rustls::pki_types::PrivateKeyDer<'static>,
 ) -> Result<Arc<ServerConfig>, TlsError> {
     let provider = rustls::crypto::CryptoProvider::get_default()
         .expect("crypto provider installed")
         .clone();
-    let verifier = Arc::new(FleetClientVerifier::new(trust, crl, metrics, provider));
+    let verifier = Arc::new(FleetClientVerifier::new(trust, crl, provider));
     let config = ServerConfig::builder()
         .with_client_cert_verifier(verifier)
         .with_single_cert(chain, key)?;

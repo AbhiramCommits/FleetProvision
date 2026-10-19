@@ -5,14 +5,14 @@
   "vlan_100": 20,
   "vlan_666": 0,
   "rejected": 0,
-  "wall_millis": 83,
+  "wall_millis": 896,
   "per_node": [
     {
       "node_id": "rack-a-node-001",
       "mac": "52:54:00:aa:bb:01",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 56,
+      "total_millis": 269,
       "vlan": 100,
       "stages": [
         {
@@ -25,19 +25,19 @@
         },
         {
           "stage": "http",
-          "millis": 3
+          "millis": 48
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "attest+enroll",
-          "millis": 50
+          "millis": 209
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 7
         }
       ],
       "error": null
@@ -47,7 +47,7 @@
       "mac": "52:54:00:aa:bb:02",
       "distro": "fedora",
       "success": true,
-      "total_millis": 62,
+      "total_millis": 199,
       "vlan": 100,
       "stages": [
         {
@@ -60,19 +60,19 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 6
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "attest+enroll",
-          "millis": 56
+          "millis": 183
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 6
         }
       ],
       "error": null
@@ -82,7 +82,7 @@
       "mac": "52:54:00:aa:bb:03",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 61,
+      "total_millis": 115,
       "vlan": 100,
       "stages": [
         {
@@ -91,11 +91,11 @@
         },
         {
           "stage": "tftp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "http",
-          "millis": 3
+          "millis": 4
         },
         {
           "stage": "dns",
@@ -103,11 +103,11 @@
         },
         {
           "stage": "attest+enroll",
-          "millis": 55
+          "millis": 105
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 3
         }
       ],
       "error": null
@@ -117,7 +117,7 @@
       "mac": "52:54:00:aa:bb:04",
       "distro": "fedora",
       "success": true,
-      "total_millis": 63,
+      "total_millis": 119,
       "vlan": 100,
       "stages": [
         {
@@ -126,23 +126,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "http",
-          "millis": 3
+          "millis": 5
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 3
         },
         {
           "stage": "attest+enroll",
-          "millis": 56
+          "millis": 105
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 3
         }
       ],
       "error": null
@@ -152,7 +152,7 @@
       "mac": "52:54:00:aa:bb:05",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 61,
+      "total_millis": 208,
       "vlan": 100,
       "stages": [
         {
@@ -161,23 +161,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "http",
-          "millis": 3
+          "millis": 7
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 40
         },
         {
           "stage": "attest+enroll",
-          "millis": 55
+          "millis": 153
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 4
         }
       ],
       "error": null
@@ -187,7 +187,7 @@
       "mac": "52:54:00:aa:bb:06",
       "distro": "fedora",
       "success": true,
-      "total_millis": 68,
+      "total_millis": 84,
       "vlan": 100,
       "stages": [
         {
@@ -196,23 +196,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 5
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 3
         },
         {
           "stage": "attest+enroll",
-          "millis": 63
+          "millis": 66
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 6
         }
       ],
       "error": null
@@ -222,7 +222,7 @@
       "mac": "52:54:00:aa:bb:07",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 56,
+      "total_millis": 243,
       "vlan": 100,
       "stages": [
         {
@@ -231,23 +231,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 1
+          "millis": 0
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 5
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 2
         },
         {
           "stage": "attest+enroll",
-          "millis": 51
+          "millis": 224
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 8
         }
       ],
       "error": null
@@ -257,7 +257,7 @@
       "mac": "52:54:00:aa:bb:08",
       "distro": "fedora",
       "success": true,
-      "total_millis": 67,
+      "total_millis": 149,
       "vlan": 100,
       "stages": [
         {
@@ -266,23 +266,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "http",
-          "millis": 3
+          "millis": 4
         },
         {
           "stage": "dns",
-          "millis": 1
+          "millis": 0
         },
         {
           "stage": "attest+enroll",
-          "millis": 60
+          "millis": 136
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 5
         }
       ],
       "error": null
@@ -292,7 +292,7 @@
       "mac": "52:54:00:aa:bb:09",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 42,
+      "total_millis": 282,
       "vlan": 100,
       "stages": [
         {
@@ -305,7 +305,7 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 52
         },
         {
           "stage": "dns",
@@ -313,11 +313,11 @@
         },
         {
           "stage": "attest+enroll",
-          "millis": 37
+          "millis": 224
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 3
         }
       ],
       "error": null
@@ -327,7 +327,7 @@
       "mac": "52:54:00:aa:bb:0a",
       "distro": "fedora",
       "success": true,
-      "total_millis": 64,
+      "total_millis": 90,
       "vlan": 100,
       "stages": [
         {
@@ -340,19 +340,19 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 5
         },
         {
           "stage": "dns",
-          "millis": 29
+          "millis": 2
         },
         {
           "stage": "attest+enroll",
-          "millis": 29
+          "millis": 78
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 2
         }
       ],
       "error": null
@@ -362,7 +362,7 @@
       "mac": "52:54:00:aa:bb:0b",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 43,
+      "total_millis": 174,
       "vlan": 100,
       "stages": [
         {
@@ -375,19 +375,19 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 9
         },
         {
           "stage": "dns",
-          "millis": 0
+          "millis": 39
         },
         {
           "stage": "attest+enroll",
-          "millis": 37
+          "millis": 117
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 6
         }
       ],
       "error": null
@@ -397,7 +397,7 @@
       "mac": "52:54:00:aa:bb:0c",
       "distro": "fedora",
       "success": true,
-      "total_millis": 44,
+      "total_millis": 259,
       "vlan": 100,
       "stages": [
         {
@@ -406,23 +406,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 9
         },
         {
           "stage": "dns",
-          "millis": 0
-        },
-        {
-          "stage": "attest+enroll",
           "millis": 39
         },
         {
+          "stage": "attest+enroll",
+          "millis": 204
+        },
+        {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 4
         }
       ],
       "error": null
@@ -432,7 +432,7 @@
       "mac": "52:54:00:aa:bb:0d",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 67,
+      "total_millis": 225,
       "vlan": 100,
       "stages": [
         {
@@ -441,23 +441,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 1
-        },
-        {
-          "stage": "http",
-          "millis": 3
-        },
-        {
-          "stage": "dns",
           "millis": 0
         },
         {
+          "stage": "http",
+          "millis": 9
+        },
+        {
+          "stage": "dns",
+          "millis": 39
+        },
+        {
           "stage": "attest+enroll",
-          "millis": 60
+          "millis": 170
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 4
         }
       ],
       "error": null
@@ -467,7 +467,7 @@
       "mac": "52:54:00:aa:bb:0e",
       "distro": "fedora",
       "success": true,
-      "total_millis": 45,
+      "total_millis": 185,
       "vlan": 100,
       "stages": [
         {
@@ -480,7 +480,7 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 47
         },
         {
           "stage": "dns",
@@ -488,11 +488,11 @@
         },
         {
           "stage": "attest+enroll",
-          "millis": 40
+          "millis": 129
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 5
         }
       ],
       "error": null
@@ -502,32 +502,32 @@
       "mac": "52:54:00:aa:bb:0f",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 69,
+      "total_millis": 219,
       "vlan": 100,
       "stages": [
         {
           "stage": "dhcp",
-          "millis": 0
-        },
-        {
-          "stage": "tftp",
-          "millis": 0
-        },
-        {
-          "stage": "http",
-          "millis": 32
-        },
-        {
-          "stage": "dns",
           "millis": 1
         },
         {
+          "stage": "tftp",
+          "millis": 1
+        },
+        {
+          "stage": "http",
+          "millis": 8
+        },
+        {
+          "stage": "dns",
+          "millis": 39
+        },
+        {
           "stage": "attest+enroll",
-          "millis": 33
+          "millis": 163
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 6
         }
       ],
       "error": null
@@ -537,7 +537,7 @@
       "mac": "52:54:00:aa:bb:10",
       "distro": "fedora",
       "success": true,
-      "total_millis": 57,
+      "total_millis": 167,
       "vlan": 100,
       "stages": [
         {
@@ -550,7 +550,7 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 4
         },
         {
           "stage": "dns",
@@ -558,11 +558,11 @@
         },
         {
           "stage": "attest+enroll",
-          "millis": 51
+          "millis": 156
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 3
         }
       ],
       "error": null
@@ -572,7 +572,7 @@
       "mac": "52:54:00:aa:bb:11",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 68,
+      "total_millis": 251,
       "vlan": 100,
       "stages": [
         {
@@ -581,23 +581,23 @@
         },
         {
           "stage": "tftp",
-          "millis": 1
+          "millis": 0
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 4
         },
         {
           "stage": "dns",
-          "millis": 29
+          "millis": 0
         },
         {
           "stage": "attest+enroll",
-          "millis": 34
+          "millis": 238
         },
         {
           "stage": "802.1x",
-          "millis": 0
+          "millis": 6
         }
       ],
       "error": null
@@ -607,7 +607,7 @@
       "mac": "52:54:00:aa:bb:12",
       "distro": "fedora",
       "success": true,
-      "total_millis": 64,
+      "total_millis": 275,
       "vlan": 100,
       "stages": [
         {
@@ -624,15 +624,15 @@
         },
         {
           "stage": "dns",
-          "millis": 29
+          "millis": 0
         },
         {
           "stage": "attest+enroll",
-          "millis": 29
+          "millis": 263
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 5
         }
       ],
       "error": null
@@ -642,32 +642,32 @@
       "mac": "52:54:00:aa:bb:13",
       "distro": "ubuntu",
       "success": true,
-      "total_millis": 66,
+      "total_millis": 99,
       "vlan": 100,
       "stages": [
         {
           "stage": "dhcp",
-          "millis": 0
-        },
-        {
-          "stage": "tftp",
           "millis": 1
         },
         {
+          "stage": "tftp",
+          "millis": 0
+        },
+        {
           "stage": "http",
-          "millis": 2
+          "millis": 3
         },
         {
           "stage": "dns",
-          "millis": 29
+          "millis": 1
         },
         {
           "stage": "attest+enroll",
-          "millis": 30
+          "millis": 87
         },
         {
           "stage": "802.1x",
-          "millis": 2
+          "millis": 5
         }
       ],
       "error": null
@@ -677,12 +677,12 @@
       "mac": "52:54:00:aa:bb:14",
       "distro": "fedora",
       "success": true,
-      "total_millis": 67,
+      "total_millis": 141,
       "vlan": 100,
       "stages": [
         {
           "stage": "dhcp",
-          "millis": 0
+          "millis": 1
         },
         {
           "stage": "tftp",
@@ -690,19 +690,19 @@
         },
         {
           "stage": "http",
-          "millis": 2
+          "millis": 4
         },
         {
           "stage": "dns",
-          "millis": 29
+          "millis": 3
         },
         {
           "stage": "attest+enroll",
-          "millis": 32
+          "millis": 121
         },
         {
           "stage": "802.1x",
-          "millis": 1
+          "millis": 10
         }
       ],
       "error": null

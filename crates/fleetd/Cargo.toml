@@ -30,6 +30,8 @@ jsonwebtoken.workspace = true
 p256.workspace = true
 rand.workspace = true
 reqwest.workspace = true
+roxmltree.workspace = true
+rsa.workspace = true
 rustls.workspace = true
 rustls-pki-types.workspace = true
 rustls-pemfile = "2"
@@ -46,6 +48,7 @@ tower.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 url.workspace = true
+xml-sec = { version = "0.1.23", default-features = false, features = ["std", "xmldsig", "c14n", "xml-backend-roxmltree"] }
 x509-parser = "0.16"
 
 [dev-dependencies]

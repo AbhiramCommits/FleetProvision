@@ -2,7 +2,7 @@
 
 use fleet_attest::fixtures::{build_blob, generate_ak_keypair, issue_ak_cert, BlobOptions};
 use fleet_attest::{AttestationBlob, Distro};
-use fleet_pki::{Ca, CaConfig, LeafSpec, LeafUsage, NodeKeypair};
+use fleet_pki::{Ca, CaConfig, LeafUsage, NodeKeypair};
 use fleet_proto::{
     ChallengeRequest, ChallengeResponse, CreateTokenRequest, CreateTokenResponse, EnrollRequest,
     EnrollResponse, HeartbeatRequest, NodesResponse, RenewRequest, RevokeRequest,
@@ -16,8 +16,7 @@ struct Harness {
     _dir: TempDir,
     running: RunningControlPlane,
     ca_pem: String,
-    operator_cert: String,
-    operator_key: String,
+    idp: fleetd::idp::RunningIdp,
 }
 
 fn free_port() -> SocketAddr {
@@ -37,20 +36,10 @@ fn init_ca(dir: &Path) -> Ca {
     ca
 }
 
-fn operator_identity(ca: &mut Ca) -> (String, String) {
-    let issued = ca
-        .issue_leaf(&LeafSpec::for_node("dc1", "operator-admin").with_usage(LeafUsage::Client))
-        .unwrap();
-    (
-        issued.cert_pem,
-        issued.key_pem.expect("operator key generated"),
-    )
-}
-
 async fn harness() -> Harness {
     let dir = tempfile::tempdir().unwrap();
-    let mut ca = init_ca(dir.path());
-    let (operator_cert, operator_key) = operator_identity(&mut ca);
+    let _ca = init_ca(dir.path());
+    let idp = fleetd::idp::start().await.unwrap();
     let running = start(ControlConfig {
         state_dir: dir.path().to_path_buf(),
         listen: free_port(),
@@ -59,6 +48,8 @@ async fn harness() -> Harness {
         token_key: None,
         site: "dc1".into(),
         policy: policy_path(),
+        oidc_issuer: idp.issuer.clone(),
+        oidc_audience: "fleetd".into(),
     })
     .await
     .unwrap();
@@ -67,9 +58,33 @@ async fn harness() -> Harness {
         _dir: dir,
         running,
         ca_pem,
-        operator_cert,
-        operator_key,
+        idp,
     }
+}
+
+fn bearer_client(ca_pem: &str, token: &str) -> reqwest::Client {
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(
+        reqwest::header::AUTHORIZATION,
+        format!("Bearer {token}").parse().unwrap(),
+    );
+    reqwest::Client::builder()
+        .add_root_certificate(reqwest::Certificate::from_pem(ca_pem.as_bytes()).unwrap())
+        .default_headers(headers)
+        .build()
+        .unwrap()
+}
+
+fn operator_client(h: &Harness, group: &str) -> reqwest::Client {
+    let token = h.idp.sign_token(
+        "operator@fleet.internal",
+        vec![group.to_string()],
+        "fleetd",
+        600,
+        &h.idp.kid,
+        None,
+    );
+    bearer_client(&h.ca_pem, &token)
 }
 
 fn tls_client(ca_pem: &str, identity: Option<(&str, &str)>) -> reqwest::Client {
@@ -83,7 +98,7 @@ fn tls_client(ca_pem: &str, identity: Option<(&str, &str)>) -> reqwest::Client {
 }
 
 async fn issue_token(h: &Harness, node_id: &str) -> String {
-    let client = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
+    let client = operator_client(h, "fleet-admin");
     let response: CreateTokenResponse = client
         .post(format!("https://{}/v1/tokens", h.running.operator_addr))
         .json(&CreateTokenRequest {
@@ -183,7 +198,7 @@ async fn enroll_or_panic(h: &Harness, node_id: &str) -> Enrolled {
 }
 
 async fn list_nodes(h: &Harness) -> NodesResponse {
-    let client = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
+    let client = operator_client(h, "fleet-admin");
     client
         .get(format!("https://{}/v1/nodes", h.running.operator_addr))
         .send()
@@ -269,7 +284,7 @@ async fn revoked_certificate_is_refused_at_handshake() {
         .error_for_status()
         .unwrap();
 
-    let operator = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
+    let operator = operator_client(&h, "fleet-admin");
     operator
         .post(format!(
             "https://{}/v1/nodes/n3/revoke",
@@ -356,8 +371,7 @@ async fn server_restart_preserves_enrollment_state() {
     let enrolled = enroll_or_panic(&h, "n5").await;
     let dir = h._dir.path().to_path_buf();
     let ca_pem = h.ca_pem.clone();
-    let operator_cert = h.operator_cert.clone();
-    let operator_key = h.operator_key.clone();
+    let issuer = h.idp.issuer.clone();
     h.running.shutdown().await;
 
     let running = start(ControlConfig {
@@ -368,10 +382,20 @@ async fn server_restart_preserves_enrollment_state() {
         token_key: None,
         site: "dc1".into(),
         policy: policy_path(),
+        oidc_issuer: issuer,
+        oidc_audience: "fleetd".into(),
     })
     .await
     .unwrap();
-    let client = tls_client(&ca_pem, Some((&operator_cert, &operator_key)));
+    let token = h.idp.sign_token(
+        "operator@fleet.internal",
+        vec!["fleet-admin".into()],
+        "fleetd",
+        600,
+        &h.idp.kid,
+        None,
+    );
+    let client = bearer_client(&ca_pem, &token);
     let nodes: NodesResponse = client
         .get(format!("https://{}/v1/nodes", running.operator_addr))
         .send()
@@ -436,23 +460,25 @@ async fn node_certificate_cannot_call_operator_endpoints() {
         .send()
         .await
         .unwrap();
-    assert_eq!(response.status().as_u16(), 403);
+    assert_eq!(response.status().as_u16(), 401);
     let body = response.text().await.unwrap();
-    assert!(body.contains("machine_credential"), "body: {body}");
+    assert!(body.contains("missing_token"), "body: {body}");
 }
 
 #[tokio::test]
-async fn operator_certificate_cannot_call_node_endpoints() {
+async fn operator_token_cannot_call_node_endpoints() {
     let h = harness().await;
-    let operator = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
-    let response = operator
+    let operator = operator_client(&h, "fleet-admin");
+    let err = operator
         .get(format!("https://{}/v1/whoami", h.running.mtls_addr))
         .send()
         .await
-        .unwrap();
-    assert_eq!(response.status().as_u16(), 403);
-    let body = response.text().await.unwrap();
-    assert!(body.contains("operator_credential"), "body: {body}");
+        .expect_err("mTLS listener must require a client certificate");
+    let text = format!("{err:?}").to_lowercase();
+    assert!(
+        text.contains("certificate") || text.contains("alert") || text.contains("tls"),
+        "{text}"
+    );
 }
 
 #[tokio::test]
@@ -472,7 +498,7 @@ async fn tampered_token_is_rejected_before_csr_processing() {
 async fn revoked_node_cannot_re_enroll_with_a_new_token() {
     let h = harness().await;
     let enrolled = enroll_or_panic(&h, "n10").await;
-    let operator = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
+    let operator = operator_client(&h, "fleet-admin");
     operator
         .post(format!(
             "https://{}/v1/nodes/n10/revoke",
@@ -497,7 +523,7 @@ async fn revoked_node_cannot_re_enroll_with_a_new_token() {
 async fn describe_and_missing_node_handling() {
     let h = harness().await;
     enroll_or_panic(&h, "n11").await;
-    let operator = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
+    let operator = operator_client(&h, "fleet-admin");
     let described: fleet_proto::NodeSummary = operator
         .get(format!("https://{}/v1/nodes/n11", h.running.operator_addr))
         .send()
@@ -526,7 +552,7 @@ async fn describe_and_missing_node_handling() {
 async fn metrics_and_crl_are_served() {
     let h = harness().await;
     enroll_or_panic(&h, "n12").await;
-    let operator = tls_client(&h.ca_pem, Some((&h.operator_cert, &h.operator_key)));
+    let operator = operator_client(&h, "fleet-admin");
     let metrics = operator
         .get(format!("https://{}/metrics", h.running.operator_addr))
         .send()
@@ -669,4 +695,168 @@ async fn replayed_nonce_and_missing_challenge_fail_closed() {
     assert_eq!(response.status().as_u16(), 403);
     let body = response.text().await.unwrap();
     assert!(body.contains("missing_challenge"), "{body}");
+}
+
+#[tokio::test]
+async fn oidc_negative_cases_are_rejected() {
+    let h = harness().await;
+    let cases = [
+        h.idp.sign_token(
+            "eve",
+            vec!["fleet-admin".into()],
+            "fleetd",
+            -3600,
+            &h.idp.kid,
+            None,
+        ),
+        h.idp.sign_token(
+            "eve",
+            vec!["fleet-admin".into()],
+            "another-service",
+            600,
+            &h.idp.kid,
+            None,
+        ),
+        h.idp.sign_token(
+            "eve",
+            vec!["fleet-admin".into()],
+            "fleetd",
+            600,
+            "unknown-kid",
+            None,
+        ),
+    ];
+    for token in cases {
+        let client = bearer_client(&h.ca_pem, &token);
+        let response = client
+            .get(format!("https://{}/v1/nodes", h.running.operator_addr))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(response.status().as_u16(), 401);
+    }
+
+    let valid = h.idp.sign_token(
+        "eve",
+        vec!["fleet-admin".into()],
+        "fleetd",
+        600,
+        &h.idp.kid,
+        None,
+    );
+    let mut parts: Vec<String> = valid.split('.').map(str::to_string).collect();
+    let mut sig = parts[2].clone().into_bytes();
+    sig[0] = if sig[0] == b'A' { b'B' } else { b'A' };
+    parts[2] = String::from_utf8(sig).unwrap();
+    let client = bearer_client(&h.ca_pem, &parts.join("."));
+    let response = client
+        .get(format!("https://{}/v1/nodes", h.running.operator_addr))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 401);
+}
+
+#[tokio::test]
+async fn operator_group_can_read_but_not_revoke() {
+    let h = harness().await;
+    enroll_or_panic(&h, "rbac1").await;
+    let reader = operator_client(&h, "fleet-operator");
+    let list = reader
+        .get(format!("https://{}/v1/nodes", h.running.operator_addr))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(list.status().as_u16(), 200);
+
+    let revoke = reader
+        .post(format!(
+            "https://{}/v1/nodes/rbac1/revoke",
+            h.running.operator_addr
+        ))
+        .json(&fleet_proto::RevokeRequest {
+            reason: "key_compromise".into(),
+        })
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(revoke.status().as_u16(), 403);
+    let body = revoke.text().await.unwrap();
+    assert!(body.contains("insufficient_group"), "{body}");
+}
+
+#[tokio::test]
+async fn operator_bearer_cannot_call_enrollment() {
+    let h = harness().await;
+    let token = h.idp.sign_token(
+        "eve",
+        vec!["fleet-admin".into()],
+        "fleetd",
+        600,
+        &h.idp.kid,
+        None,
+    );
+    let client = bearer_client(&h.ca_pem, &token);
+    let response = client
+        .post(format!("https://{}/v1/enroll", h.running.enroll_addr))
+        .json(&serde_json::json!({
+            "token": "irrelevant",
+            "node_id": "x",
+            "site": "dc1",
+            "hostname": "x",
+            "csr_pem": "irrelevant",
+            "attestation": {}
+        }))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 403);
+    let body = response.text().await.unwrap();
+    assert!(body.contains("operator_credential"), "{body}");
+}
+
+#[tokio::test]
+async fn session_endpoint_returns_operator_groups() {
+    let h = harness().await;
+    let client = operator_client(&h, "fleet-operator");
+    let session: serde_json::Value = client
+        .get(format!(
+            "https://{}/v1/auth/session",
+            h.running.operator_addr
+        ))
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    assert_eq!(session["subject"], "operator@fleet.internal");
+    assert!(session["groups"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|g| g == "fleet-operator"));
+}
+
+#[tokio::test]
+async fn audit_log_records_enrollment_and_detects_tampering() {
+    let h = harness().await;
+    enroll_or_panic(&h, "audit1").await;
+    let path = h._dir.path().join("audit.jsonl");
+    let report = fleetd::audit::verify(&path).unwrap();
+    assert!(report.valid);
+    assert!(report.records >= 2, "enroll + vlan assignment expected");
+    let contents = std::fs::read_to_string(&path).unwrap();
+    assert!(contents.contains("\"action\":\"enroll\""));
+    assert!(contents.contains("\"action\":\"vlan_assignment\""));
+
+    let mut bytes = std::fs::read(&path).unwrap();
+    let mid = bytes.len() / 2;
+    bytes[mid] ^= 0x01;
+    std::fs::write(&path, bytes).unwrap();
+    let report = fleetd::audit::verify(&path).unwrap();
+    assert!(!report.valid);
+    assert!(report.first_bad_seq.is_some());
 }

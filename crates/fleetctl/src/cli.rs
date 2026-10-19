@@ -52,6 +52,11 @@ pub enum Command {
     },
     /// Authenticate an operator through the OIDC device flow.
     Login(LoginArgs),
+    /// SAML assertion operations (gateway verification, no browser flow).
+    Saml {
+        #[command(subcommand)]
+        command: SamlCommand,
+    },
     /// Audit-log operations.
     Audit {
         #[command(subcommand)]
@@ -168,6 +173,31 @@ pub struct LoginArgs {
     /// OIDC issuer (mock IdP by default).
     #[arg(long, default_value = "http://127.0.0.1:8080")]
     pub idp: String,
+    /// Fleet group to request: fleet-operator (read) or fleet-admin (write).
+    #[arg(long, default_value = "fleet-operator")]
+    pub group: String,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum SamlCommand {
+    /// Verify a signed SAML 2.0 Response and print the mapped groups.
+    Verify(SamlVerifyArgs),
+}
+
+#[derive(Debug, Args)]
+pub struct SamlVerifyArgs {
+    #[arg(long)]
+    pub response: PathBuf,
+    #[arg(long, default_value = "fixtures/saml/idp-public-key.pem")]
+    pub key: PathBuf,
+    #[arg(long, default_value = "https://idp.fleet.internal")]
+    pub issuer: String,
+    #[arg(long, default_value = "fleetd")]
+    pub audience: String,
+    #[arg(long, default_value = "https://127.0.0.1:9443/v1/saml/acs")]
+    pub destination: String,
+    #[arg(long, default_value = "req-abc123")]
+    pub in_response_to: String,
 }
 
 #[derive(Debug, Subcommand)]

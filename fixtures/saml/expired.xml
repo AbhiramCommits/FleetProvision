@@ -1,0 +1,37 @@
+<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" Destination="https://127.0.0.1:9443/v1/saml/acs" ID="_resp-expired" InResponseTo="req-abc123" IssueInstant="2026-01-01T00:00:00Z" Version="2.0">
+  <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://idp.fleet.internal</saml:Issuer>
+  <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_assert-expired" IssueInstant="2026-01-01T00:00:00Z" Version="2.0">
+  <saml:Issuer>https://idp.fleet.internal</saml:Issuer>
+  <saml:Subject>
+    <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">alice@fleet.internal</saml:NameID>
+    <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+      <saml:SubjectConfirmationData NotOnOrAfter="2020-01-01T00:00:00Z" Recipient="https://127.0.0.1:9443/v1/saml/acs" InResponseTo="req-abc123"/>
+    </saml:SubjectConfirmation>
+  </saml:Subject>
+  <saml:Conditions NotBefore="2018-01-01T00:00:00Z" NotOnOrAfter="2020-01-01T00:00:00Z">
+    <saml:AudienceRestriction><saml:Audience>fleetd</saml:Audience></saml:AudienceRestriction>
+  </saml:Conditions>
+  <saml:AuthnStatement AuthnInstant="2026-01-01T00:00:00Z" SessionIndex="_session-1">
+    <saml:AuthnContext><saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef></saml:AuthnContext>
+  </saml:AuthnStatement>
+  <saml:AttributeStatement>
+    <saml:Attribute Name="groups" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue>fleet-admin</saml:AttributeValue></saml:Attribute>
+  </saml:AttributeStatement>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#_assert-expired"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>jh/YnJuPxinjVlCIkic1gua5TSe84KUcvHkYa4axniY=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>JiJMfQ3QYYIZbLMoyoIg/wF2roh781tqkP99k05LowvJ9D7aJWNowbStmAZqYfiVlaGnP3stU3NWrJmoC4I4aK017+5VRFRRIMPRizG9aSs2gbPJvwWkpA8IFTS2JvdxAdsyPeYxtzKpDU+OjKHxe7EKHfCxoPi6gevwp6KNs9Ufmbbgh6pE7ojLUh8r2SYMJHWNnPUOUN3Cy+mZdmC8egR+PZagUVe2Oj8DoCaMR37obIqsEap98gRdFWnWjxvCmq/8Z1rfSnpvdjBljiTAp96Dl8wEPeWRaKjx/09hFfsNmRFLk+uXg9P/pNrxxdQBmGRdJZnNJdr2nbNBPj4+4A==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIC2jCCAcKgAwIBAgIURsXI0Gzn/x4xrP5IHWRclaiIhOQwDQYJKoZIhvcNAQEL
+BQAwJzElMCMGA1UEAwwcRmxlZXRQcm92aXNpb24gTW9jayBTQU1MIElkUDAeFw0y
+NjEwMTgyMDI2NDBaFw0zNjEwMTYyMDI2NDBaMCcxJTAjBgNVBAMMHEZsZWV0UHJv
+dmlzaW9uIE1vY2sgU0FNTCBJZFAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+AoIBAQDnQw8eZjhrWJSkl0vSB400znB+7ixg/sZVer3qu1Izh5gjShBtMH5cnHSg
+BSNO9HPd49Y+hUGS88M6j6/GD1XxZ9Img9lpbPzYxBLpzWML6vqIfnuIptuVpNSm
+PxcDTkhgSwtgUuDsLRyOPhnPUEobhWpYgMuWeFvEaslzHNKrmTBPuM+WbpYhTnvD
+K6YWFRRw4ZEo+nfOSAgGIIteWA4OTQcw9J5I78vQokd0kHtFzkn9tPKFq7i5YiGl
+BteJulvMDwFubhEHLmUmkG1qNE9rWt1OfCHkzLn7L8kwDrO3Qg2UZOJm0jA/JkRN
+hwjs/MgINJxWCfbFgsf5MUrrfwIhAgMBAAEwDQYJKoZIhvcNAQELBQADggEBABLC
+6l5xUEBwbJWh/yWCYCOW24+N9C4b43EVJpGBP19ZfL0NQKAephLjIKL7pBAa2gvK
+mIBNG+tSMdepG+tEwXXEXcZf6sQlAy17ekB2Bh4JquHUzUziW8dhDjyu7f/B8PFQ
+/3MGg9VjS9YHRQsMtkpopVUAVarxgT+WH2FFC8PplRO6gL0hy4FkmUY5kZB8jsx+
++y5LutN3NckFbqdhkqYOVYa6vQiGt04UIF/6bNpe98U4hNn7jhXyakUnQjG2VQR2
+bEme11DzOhv006Wyka+Gd+iHkqMpZYWWGxM+jD0H+8ELU7l4v5ZXH8sMw6dhyLhw
+2dDTCMtm+2uyOPcWnqE=
+</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature></saml:Assertion>
+</samlp:Response>
