@@ -8,7 +8,6 @@ timezone UTC --utc
 network --bootproto=dhcp --device=link --activate
 rootpw --lock
 user --name=fedora --groups=wheel --plaintext --password=fedora
-sshkey --username=fedora "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINotARealKeyJustForKickstartValidationOnly fleet@example.invalid"
 selinux --enforcing
 firewall --enabled --service=ssh
 services --enabled=sshd,chronyd,qemu-guest-agent

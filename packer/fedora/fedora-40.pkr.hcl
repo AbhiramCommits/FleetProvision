@@ -35,9 +35,9 @@ variable "fleet_agent_binary" {
 }
 
 source "qemu" "fedora_40" {
-  iso_url      = "https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/40/Server/x86_64/iso/Fedora-Server-dvd-x86_64-40-1.14.iso"
-  iso_checksum = "sha256:32d9ab1798fc8106a0b06e873bdcd83a3efea8412c9401dfe4097347ed0cfc65"
-  vm_name      = "fedora-40.qcow2"
+  iso_url          = "https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/40/Server/x86_64/iso/Fedora-Server-dvd-x86_64-40-1.14.iso"
+  iso_checksum     = "sha256:32d9ab1798fc8106a0b06e873bdcd83a3efea8412c9401dfe4097347ed0cfc65"
+  vm_name          = "fedora-40.qcow2"
   output_directory = var.output_dir
 
   http_directory = "../../provisioning"

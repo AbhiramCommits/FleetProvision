@@ -42,6 +42,7 @@ pub struct ControlConfig {
     pub policy: PathBuf,
     pub oidc_issuer: String,
     pub oidc_audience: String,
+    pub public_url: String,
 }
 
 impl ControlConfig {
@@ -56,6 +57,7 @@ impl ControlConfig {
             policy: args.policy.clone(),
             oidc_issuer: args.oidc_issuer.clone(),
             oidc_audience: "fleetd".into(),
+            public_url: args.public_url.clone(),
         }
     }
 }
@@ -118,6 +120,10 @@ pub async fn start(config: ControlConfig) -> anyhow::Result<RunningControlPlane>
             config.state_dir.display()
         )
     })?;
+    let crl_url = format!("{}/v1/crl", config.public_url.trim_end_matches('/'));
+    if ca.config().crl_url != crl_url {
+        ca.set_crl_url(crl_url)?;
+    }
     let trust = Arc::new(TrustMaterial::from_pem(&ca.trust_bundle_pem())?);
     let crl = Arc::new(RwLock::new(ca.crl_store()?));
     let store = Store::load(&config.state_dir, config.token_key.as_deref())?;

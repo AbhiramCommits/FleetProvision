@@ -50,6 +50,7 @@ async fn harness() -> Harness {
         policy: policy_path(),
         oidc_issuer: idp.issuer.clone(),
         oidc_audience: "fleetd".into(),
+        public_url: "https://127.0.0.1:8443".into(),
     })
     .await
     .unwrap();
@@ -384,6 +385,7 @@ async fn server_restart_preserves_enrollment_state() {
         policy: policy_path(),
         oidc_issuer: issuer,
         oidc_audience: "fleetd".into(),
+        public_url: "https://127.0.0.1:8443".into(),
     })
     .await
     .unwrap();

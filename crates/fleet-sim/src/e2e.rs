@@ -78,6 +78,7 @@ pub async fn run(nodes: usize) -> anyhow::Result<E2eReport> {
         policy: policy_path(),
         oidc_issuer: idp.issuer.clone(),
         oidc_audience: "fleetd".into(),
+        public_url: "https://127.0.0.1:8443".into(),
     })
     .await
     .context("starting in-process fleetd")?;

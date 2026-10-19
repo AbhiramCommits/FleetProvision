@@ -942,7 +942,7 @@ The configuration is valid.
 == packer init + validate: packer/fedora ==
 The configuration is valid.
 == ansible-lint ==
-[2mWARNING  Directory expansion discovered 11 file(s). If this is more than expected, use 'exclude_paths' in your ansible-lint configuration to narrow the scope. See: https://docs.ansible.com/projects/lint/configuring/[0m
+[2mWARNING  Directory expansion discovered 9 file(s). If this is more than expected, use 'exclude_paths' in your ansible-lint configuration to narrow the scope. See: https://docs.ansible.com/projects/lint/configuring/[0m
 
-[32mPassed[0m: 0 failure(s), 0 warning(s) in 9 files processed of 13 encountered. Last profile that met the validation criteria was 'production'.
+[32mPassed[0m: 0 failure(s), 0 warning(s) in 9 files processed of 11 encountered. Last profile that met the validation criteria was 'production'.
 iac validation complete (all)

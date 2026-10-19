@@ -16,10 +16,6 @@ pub struct Cli {
     #[arg(long, global = true, default_value = "https://127.0.0.1:9443")]
     pub server: String,
 
-    /// Machine mTLS base URL (node API).
-    #[arg(long, global = true, default_value = "https://127.0.0.1:8443")]
-    pub mtls_server: String,
-
     /// Skip TLS verification (development only; never use in production).
     #[arg(long, global = true)]
     pub insecure: bool,

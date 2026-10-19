@@ -445,6 +445,12 @@ impl Ca {
         &self.config
     }
 
+    /// Update the CRL distribution point embedded in newly issued leaves.
+    pub fn set_crl_url(&mut self, url: impl Into<String>) -> Result<(), PkiError> {
+        self.config.crl_url = url.into();
+        self.flush()
+    }
+
     pub fn root_pem(&self) -> &str {
         &self.root_pem
     }

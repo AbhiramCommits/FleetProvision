@@ -35,9 +35,9 @@ variable "fleet_agent_binary" {
 }
 
 source "qemu" "ubuntu_2404" {
-  iso_url      = "https://releases.ubuntu.com/24.04/ubuntu-24.04.5-live-server-amd64.iso"
-  iso_checksum = "sha256:97f3d7ffb032c3eb3b23d2c8be9cc76e60c2c1f2c0146ba5ba9fe01cafae0fd8"
-  vm_name      = "ubuntu-2404.qcow2"
+  iso_url          = "https://releases.ubuntu.com/24.04/ubuntu-24.04.5-live-server-amd64.iso"
+  iso_checksum     = "sha256:97f3d7ffb032c3eb3b23d2c8be9cc76e60c2c1f2c0146ba5ba9fe01cafae0fd8"
+  vm_name          = "ubuntu-2404.qcow2"
   output_directory = var.output_dir
 
   http_directory = "../../provisioning"

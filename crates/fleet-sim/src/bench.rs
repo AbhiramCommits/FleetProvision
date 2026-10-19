@@ -242,6 +242,7 @@ async fn mtls_measurements() -> anyhow::Result<MtlsMetrics> {
         policy: PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../policy/boot-integrity.yaml"),
         oidc_issuer: idp.issuer.clone(),
         oidc_audience: "fleetd".into(),
+        public_url: "https://127.0.0.1:8443".into(),
     })
     .await?;
     let token = {
@@ -517,6 +518,7 @@ async fn failure_scenarios() -> anyhow::Result<FailureMetrics> {
         policy: PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../policy/boot-integrity.yaml"),
         oidc_issuer: idp.issuer.clone(),
         oidc_audience: "fleetd".into(),
+        public_url: "https://127.0.0.1:8443".into(),
     })
     .await?;
     use tokio::io::AsyncWriteExt;
