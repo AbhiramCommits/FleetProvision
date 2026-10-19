@@ -1,0 +1,33 @@
+[Unit]
+Description=FleetProvision node enrollment (runs once before the node cert exists)
+Documentation=https://github.com/fleetprovision/FleetProvision
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/var/lib/fleet-agent/node/node.crt.pem
+ConditionPathExists=/etc/fleet-agent/enroll.env
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+EnvironmentFile=/etc/fleet-agent/enroll.env
+ExecStart=/usr/local/bin/fleet-agent enroll \
+    --enroll-url ${FLEET_ENROLL_URL} \
+    --node-id ${FLEET_NODE_ID} \
+    --site ${FLEET_SITE} \
+    --token ${FLEET_BOOTSTRAP_TOKEN} \
+    --state-dir /var/lib/fleet-agent \
+    --ca-bundle /etc/fleet-agent/trust-bundle.pem
+RemainAfterExit=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/fleet-agent
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

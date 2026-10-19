@@ -22,6 +22,7 @@ fleet-attest = { path = "../fleet-attest" }
 fleet-pki = { path = "../fleet-pki" }
 fleet-proto = { path = "../fleet-proto" }
 hex.workspace = true
+hmac = "0.12"
 http.workspace = true
 hyper.workspace = true
 hyper-util.workspace = true
@@ -31,6 +32,7 @@ rand.workspace = true
 reqwest.workspace = true
 rustls.workspace = true
 rustls-pki-types.workspace = true
+rustls-pemfile = "2"
 rustls-webpki.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -44,6 +46,7 @@ tower.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 url.workspace = true
+x509-parser = "0.16"
 
 [dev-dependencies]
 tempfile.workspace = true

@@ -1,8 +1,30 @@
 //! FleetProvision control plane.
+//!
+//! Three listeners separate machine enrollment from node mTLS and from human
+//! operator access:
+//!
+//! * `--enroll-listen`  token-gated TLS, used before a node has an identity
+//! * `--listen`         mandatory client-certificate mTLS for enrolled nodes
+//! * `--operator-listen` human/operator API (OIDC in step 6)
+//!
+//! Node certificates are rejected on operator endpoints and operator identities
+//! are rejected on node endpoints. Both checks are asserted in tests.
+
+pub mod agent;
+pub mod control;
+pub mod metrics;
+pub mod store;
+pub mod tls;
+pub mod tokens;
+
+pub use control::{start, ControlConfig, RunningControlPlane};
+pub use store::{NodeRecord, Store};
+pub use tokens::{TokenError, TokenManager};
 
 use clap::Parser;
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Command-line configuration for the control plane.
 #[derive(Debug, Clone, Parser)]
@@ -16,7 +38,7 @@ pub struct ServerArgs {
     #[arg(long, default_value = "./state")]
     pub state_dir: PathBuf,
 
-    /// mTLS listener for enrolled nodes and operator machine-to-machine calls.
+    /// mTLS listener for enrolled nodes and machine-to-machine calls.
     #[arg(long, default_value = "127.0.0.1:8443")]
     pub listen: SocketAddr,
 
@@ -24,7 +46,7 @@ pub struct ServerArgs {
     #[arg(long, default_value = "127.0.0.1:8444")]
     pub enroll_listen: SocketAddr,
 
-    /// Operator listener: server TLS plus OIDC/SAML bearer tokens.
+    /// Operator listener (human identities, separate from machine mTLS).
     #[arg(long, default_value = "127.0.0.1:9443")]
     pub operator_listen: SocketAddr,
 
@@ -57,14 +79,26 @@ impl ServerArgs {
     }
 }
 
-/// Start the control plane. The full implementation arrives with the mTLS
-/// layer; keeping the entry point here makes `fleetd --help` and argument
-/// validation testable from the first commit.
+pub fn unix_now() -> i64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0)
+}
+
+/// Start the control plane and serve until Ctrl-C.
 pub async fn run(args: ServerArgs) -> anyhow::Result<()> {
-    anyhow::bail!(
-        "control plane state at {} is not initialized (run `fleetctl ca init` first)",
-        args.state_dir.display()
-    )
+    let config = ControlConfig::from_args(&args);
+    let running = control::start(config).await?;
+    tracing::info!(
+        mtls = %running.mtls_addr,
+        enroll = %running.enroll_addr,
+        operator = %running.operator_addr,
+        "fleetd ready"
+    );
+    tokio::signal::ctrl_c().await?;
+    running.shutdown().await;
+    Ok(())
 }
 
 #[cfg(test)]

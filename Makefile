@@ -24,7 +24,7 @@ iac-validate:
 	bash scripts/iac-validate.sh
 
 e2e: build
-	$(CARGO) run -p fleet-sim --release -- e2e --nodes 20
+	bash scripts/e2e-control-plane.sh
 
 bench: build
 	$(CARGO) run -p fleet-sim --release -- bench --out results

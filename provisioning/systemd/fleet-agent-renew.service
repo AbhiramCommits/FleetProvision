@@ -1,0 +1,23 @@
+[Unit]
+Description=FleetProvision certificate renewal (renews after 2/3 of lifetime)
+Documentation=https://github.com/fleetprovision/FleetProvision
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/var/lib/fleet-agent/node/node.crt.pem
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/bin/fleet-agent renew \
+    --control-plane https://fleetd.fleet.internal:8443 \
+    --state-dir /var/lib/fleet-agent
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/fleet-agent
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

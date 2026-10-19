@@ -4,7 +4,7 @@ use anyhow::{bail, Context};
 use clap::Parser;
 use cli::{
     AttestCommand, AuditCommand, CaCommand, CaInitArgs, CaIssueArgs, CaRevokeArgs, CaVerifyArgs,
-    Cli, Command, NodeCommand,
+    Cli, Command, NodeCommand, TokenCommand,
 };
 use fleet_pki::{Ca, CaConfig, IssuedCert, LeafSpec, LeafUsage, NodeKeypair};
 use serde::{Deserialize, Serialize};
@@ -30,6 +30,7 @@ async fn main() -> anyhow::Result<()> {
     match cli.command {
         Command::Ca { command } => run_ca(&state_dir, command),
         Command::Node { command } => run_node(&state_dir, &server, insecure, command).await,
+        Command::Token { command } => run_token(&state_dir, &server, insecure, command).await,
         Command::Attest { command } => run_attest(command),
         Command::Login(args) => run_login(&state_dir, &server, insecure, args).await,
         Command::Audit { command } => run_audit(&state_dir, command),
@@ -264,39 +265,32 @@ async fn run_node(
     insecure: bool,
     command: NodeCommand,
 ) -> anyhow::Result<()> {
+    let client = operator_client(state_dir, insecure)?;
     match command {
         NodeCommand::List => {
-            let token = load_operator_token(state_dir)?;
-            let client = operator_client(state_dir, server, insecure, &token)?;
-            let response = client.get(format!("{}/v1/nodes", server)).send().await?;
+            let response = client.get(format!("{server}/v1/nodes")).send().await?;
             print_json_response(response).await
         }
         NodeCommand::Describe { node_id } => {
-            let token = load_operator_token(state_dir)?;
-            let client = operator_client(state_dir, server, insecure, &token)?;
             let response = client
-                .get(format!("{}/v1/nodes/{}", server, node_id))
+                .get(format!("{server}/v1/nodes/{node_id}"))
                 .send()
                 .await?;
             print_json_response(response).await
         }
         NodeCommand::Revoke { node_id } => {
-            let token = load_operator_token(state_dir)?;
-            let client = operator_client(state_dir, server, insecure, &token)?;
             let response = client
-                .post(format!("{}/v1/nodes/{}/revoke", server, node_id))
+                .post(format!("{server}/v1/nodes/{node_id}/revoke"))
                 .json(&serde_json::json!({"reason": "key_compromise"}))
                 .send()
                 .await?;
             print_json_response(response).await
         }
         NodeCommand::Renew { node_id, csr } => {
-            let token = load_operator_token(state_dir)?;
-            let client = operator_client(state_dir, server, insecure, &token)?;
             let csr_pem = std::fs::read_to_string(&csr)
                 .with_context(|| format!("reading CSR {}", csr.display()))?;
             let response = client
-                .post(format!("{}/v1/nodes/{}/renew", server, node_id))
+                .post(format!("{server}/v1/nodes/{node_id}/renew"))
                 .json(&serde_json::json!({"csr_pem": csr_pem}))
                 .send()
                 .await?;
@@ -305,48 +299,70 @@ async fn run_node(
     }
 }
 
-fn operator_client(
+async fn run_token(
     state_dir: &Path,
-    _server: &str,
+    server: &str,
     insecure: bool,
-    token: &str,
-) -> anyhow::Result<reqwest::Client> {
+    command: TokenCommand,
+) -> anyhow::Result<()> {
+    match command {
+        TokenCommand::Create {
+            node_id,
+            site,
+            ttl,
+            out,
+        } => {
+            let client = operator_client(state_dir, insecure)?;
+            let response = client
+                .post(format!("{server}/v1/tokens"))
+                .json(&serde_json::json!({
+                    "node_id": node_id,
+                    "site": site,
+                    "ttl_seconds": ttl,
+                }))
+                .send()
+                .await?;
+            let status = response.status();
+            let body: serde_json::Value = response.json().await?;
+            if !status.is_success() {
+                bail!("token creation failed with {status}: {body}");
+            }
+            let token = body
+                .get("token")
+                .and_then(|v| v.as_str())
+                .context("response did not include a token")?;
+            if let Some(path) = out {
+                std::fs::write(&path, token)?;
+                println!("wrote bootstrap token to {}", path.display());
+            } else {
+                println!("{token}");
+            }
+            eprintln!("node_id: {}", body["node_id"]);
+            eprintln!("expires_at: {}", body["expires_at"]);
+            Ok(())
+        }
+    }
+}
+
+fn operator_client(state_dir: &Path, insecure: bool) -> anyhow::Result<reqwest::Client> {
     let mut builder = reqwest::Client::builder().danger_accept_invalid_certs(insecure);
-    // Trust the fleet root for the operator listener when the caller supplies it.
     let root = state_dir.join("root-cert.pem");
     if root.exists() {
         let pem = std::fs::read(&root)?;
         builder = builder.add_root_certificate(reqwest::Certificate::from_pem(&pem)?);
     }
-    let client = builder
-        .default_headers({
-            let mut headers = reqwest::header::HeaderMap::new();
-            headers.insert(
-                reqwest::header::AUTHORIZATION,
-                format!("Bearer {token}").parse()?,
-            );
-            headers
-        })
-        .build()?;
-    Ok(client)
-}
-
-fn load_operator_token(state_dir: &Path) -> anyhow::Result<String> {
-    let path = state_dir.join("operator-token.json");
-    let raw = std::fs::read(&path).with_context(|| {
-        format!(
-            "no operator token at {}; run `fleetctl login` first",
-            path.display()
-        )
-    })?;
-    #[derive(Deserialize)]
-    struct TokenFile {
-        access_token: String,
-        #[allow(dead_code)]
-        expires_at: i64,
+    let node_dir = state_dir.join("nodes/operator-admin");
+    let cert = node_dir.join("node.crt.pem");
+    let key = node_dir.join("node.key.pem");
+    if cert.exists() && key.exists() {
+        let identity = format!(
+            "{}{}",
+            std::fs::read_to_string(cert)?,
+            std::fs::read_to_string(key)?
+        );
+        builder = builder.identity(reqwest::Identity::from_pem(identity.as_bytes())?);
     }
-    let token: TokenFile = serde_json::from_slice(&raw)?;
-    Ok(token.access_token)
+    Ok(builder.build()?)
 }
 
 async fn print_json_response(response: reqwest::Response) -> anyhow::Result<()> {
@@ -356,7 +372,7 @@ async fn print_json_response(response: reqwest::Response) -> anyhow::Result<()> 
         bail!("request failed with {status}: {body}");
     }
     let value: serde_json::Value =
-        serde_json::from_str(&body).unwrap_or_else(|_| serde_json::Value::String(body.clone()));
+        serde_json::from_str(&body).unwrap_or(serde_json::Value::String(body));
     println!("{}", serde_json::to_string_pretty(&value)?);
     Ok(())
 }

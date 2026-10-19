@@ -16,6 +16,10 @@ pub struct Cli {
     #[arg(long, global = true, default_value = "https://127.0.0.1:9443")]
     pub server: String,
 
+    /// Machine mTLS base URL (node API).
+    #[arg(long, global = true, default_value = "https://127.0.0.1:8443")]
+    pub mtls_server: String,
+
     /// Skip TLS verification (development only; never use in production).
     #[arg(long, global = true)]
     pub insecure: bool,
@@ -35,6 +39,11 @@ pub enum Command {
     Node {
         #[command(subcommand)]
         command: NodeCommand,
+    },
+    /// Bootstrap-token operations (requires an operator identity).
+    Token {
+        #[command(subcommand)]
+        command: TokenCommand,
     },
     /// Boot-integrity attestation checks.
     Attest {
@@ -110,17 +119,33 @@ pub struct CaVerifyArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum NodeCommand {
-    /// List all nodes known to fleetd (requires fleet-operator).
+    /// List all nodes known to fleetd.
     List,
-    /// Describe one node including attestation violations (requires fleet-operator).
+    /// Describe one node including attestation violations.
     Describe { node_id: String },
-    /// Revoke a node (requires fleet-admin).
+    /// Revoke a node.
     Revoke { node_id: String },
-    /// Renew a node certificate from a CSR (requires fleet-admin).
+    /// Renew a node certificate from a CSR.
     Renew {
         node_id: String,
         #[arg(long)]
         csr: PathBuf,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum TokenCommand {
+    /// Issue a single-use bootstrap token for a node.
+    Create {
+        #[arg(long)]
+        node_id: String,
+        #[arg(long, default_value = "dc1")]
+        site: String,
+        #[arg(long, default_value_t = 900)]
+        ttl: u64,
+        /// Write the token to a file instead of stdout.
+        #[arg(long)]
+        out: Option<PathBuf>,
     },
 }
 
@@ -195,6 +220,25 @@ mod tests {
             cli.command,
             Command::Attest {
                 command: AttestCommand::Check { .. }
+            }
+        ));
+    }
+
+    #[test]
+    fn token_create_parses() {
+        let cli = Cli::parse_from([
+            "fleetctl",
+            "token",
+            "create",
+            "--node-id",
+            "n1",
+            "--ttl",
+            "60",
+        ]);
+        assert!(matches!(
+            cli.command,
+            Command::Token {
+                command: TokenCommand::Create { ttl: 60, .. }
             }
         ));
     }

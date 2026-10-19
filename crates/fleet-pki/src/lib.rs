@@ -132,6 +132,10 @@ pub struct LeafSpec {
     pub hostname: String,
     pub usage: LeafUsage,
     pub validity_days: i64,
+    /// Extra DNS SANs (for example `localhost` for the control-plane listener).
+    pub extra_dns: Vec<String>,
+    /// Extra IP SANs (loopback addresses used by local clients and tests).
+    pub extra_ips: Vec<String>,
     /// Optional PKCS#10 CSR from the node. When absent the CA generates a key
     /// pair and returns it once, which is convenient for operator tooling.
     pub csr_pem: Option<String>,
@@ -147,6 +151,8 @@ impl LeafSpec {
             site,
             usage: LeafUsage::Client,
             validity_days: 90,
+            extra_dns: Vec::new(),
+            extra_ips: Vec::new(),
             csr_pem: None,
         }
     }
@@ -168,6 +174,16 @@ impl LeafSpec {
 
     pub fn with_hostname(mut self, hostname: impl Into<String>) -> Self {
         self.hostname = hostname.into();
+        self
+    }
+
+    pub fn with_extra_dns(mut self, dns: impl Into<String>) -> Self {
+        self.extra_dns.push(dns.into());
+        self
+    }
+
+    pub fn with_extra_ip(mut self, ip: impl Into<String>) -> Self {
+        self.extra_ips.push(ip.into());
         self
     }
 }
@@ -580,10 +596,22 @@ impl Ca {
             DnType::OrganizationName,
             format!("{} {}", self.config.organization, spec.site),
         );
-        params.subject_alt_names = vec![
+        let mut sans = vec![
             SanType::DnsName(rcgen::string::Ia5String::try_from(dns_name.clone())?),
             SanType::URI(rcgen::string::Ia5String::try_from(uri.clone())?),
         ];
+        for dns in &spec.extra_dns {
+            sans.push(SanType::DnsName(rcgen::string::Ia5String::try_from(
+                dns.clone(),
+            )?));
+        }
+        for ip in &spec.extra_ips {
+            let addr = ip
+                .parse()
+                .map_err(|_| PkiError::X509(format!("invalid IP SAN {ip}")))?;
+            sans.push(SanType::IpAddress(addr));
+        }
+        params.subject_alt_names = sans;
         params.is_ca = IsCa::NoCa;
         params.key_usages = vec![KeyUsagePurpose::DigitalSignature];
         params.extended_key_usages = vec![spec.usage.eku()];
@@ -893,6 +921,50 @@ pub fn san_identities(der: &[u8]) -> Result<BTreeSet<String>, PkiError> {
         }
     }
     Ok(out)
+}
+
+/// Identity extracted from a certificate SAN without performing chain
+/// verification. Callers must verify the chain first (for example in the
+/// rustls client-certificate verifier).
+pub fn peer_identity(der: &[u8]) -> Result<LeafIdentity, PkiError> {
+    let (_, cert) =
+        x509_parser::parse_x509_certificate(der).map_err(|e| PkiError::X509(e.to_string()))?;
+    let mut dns_name = None;
+    let mut uri = None;
+    for ext in cert.extensions() {
+        if let ParsedExtension::SubjectAlternativeName(san) = ext.parsed_extension() {
+            for name in &san.general_names {
+                match name {
+                    GeneralName::DNSName(dns) => dns_name = Some((*dns).to_string()),
+                    GeneralName::URI(u) => uri = Some((*u).to_string()),
+                    _ => {}
+                }
+            }
+        }
+    }
+    let dns_name = dns_name.ok_or(PkiError::MissingIdentity)?;
+    let uri = uri.ok_or(PkiError::MissingIdentity)?;
+    let hostname = dns_name
+        .strip_suffix(".fleet.internal")
+        .ok_or(PkiError::MissingIdentity)?
+        .to_string();
+    let rest = uri
+        .strip_prefix("fleet://")
+        .ok_or(PkiError::MissingIdentity)?;
+    let (site, node_id) = rest.split_once('/').ok_or(PkiError::MissingIdentity)?;
+    Ok(LeafIdentity {
+        node_id: node_id.to_string(),
+        site: site.to_string(),
+        hostname,
+        dns_name,
+        uri,
+        serial_hex: hex::encode(cert.raw_serial()),
+        not_before: cert.validity().not_before.timestamp(),
+        not_after: cert.validity().not_after.timestamp(),
+        // Usage is not encoded separately from the EKU; the caller knows the
+        // context in which the certificate was presented.
+        usage: LeafUsage::Client,
+    })
 }
 
 #[cfg(test)]
