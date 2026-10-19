@@ -29,15 +29,16 @@ hyper = { version = "1", features = ["server", "http1"] }
 hyper-util = { version = "0.1", features = ["server-auto", "tokio"] }
 jsonwebtoken = "9"
 p256 = { version = "0.13", features = ["ecdsa", "pkcs8", "pem"] }
+pem = "3"
 quick-xml = "0.37"
 rand = "0.8"
-rcgen = { version = "0.13", features = ["pem"] }
+rcgen = { version = "0.14", features = ["pem", "x509-parser"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "http2"] }
 roxmltree = "0.20"
 rsa = { version = "0.9", features = ["sha2", "pem"] }
 rustls = "0.23"
 rustls-pki-types = "1"
-rustls-webpki = "0.103"
+rustls-webpki = { version = "0.103", features = ["ring"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_yaml = "0.9"
