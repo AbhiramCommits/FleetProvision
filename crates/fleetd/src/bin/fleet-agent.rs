@@ -46,6 +46,9 @@ struct EnrollArgs {
     /// Root CA bundle used to authenticate the enrollment listener.
     #[arg(long)]
     ca_bundle: PathBuf,
+    /// Target distribution whose bootloader measurement should be simulated.
+    #[arg(long, default_value = "ubuntu")]
+    distro: String,
 }
 
 #[derive(Debug, Args)]
@@ -74,6 +77,11 @@ async fn main() -> anyhow::Result<()> {
     match AgentCli::parse().command {
         AgentCommand::Enroll(args) => {
             let hostname = args.hostname.unwrap_or_else(|| args.node_id.clone());
+            let distro = match args.distro.to_ascii_lowercase().as_str() {
+                "ubuntu" => fleet_attest::Distro::Ubuntu,
+                "fedora" => fleet_attest::Distro::Fedora,
+                other => anyhow::bail!("unknown distro {other}; expected ubuntu or fedora"),
+            };
             let config = fleetd::agent::EnrollConfig {
                 control_plane: args.enroll_url.clone(),
                 enroll_url: args.enroll_url,
@@ -83,6 +91,7 @@ async fn main() -> anyhow::Result<()> {
                 site: args.site,
                 hostname,
                 ca_bundle: args.ca_bundle,
+                distro,
             };
             let enrolled = fleetd::agent::enroll(&config)
                 .await

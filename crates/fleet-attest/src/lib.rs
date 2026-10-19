@@ -1,40 +1,45 @@
 //! Boot-integrity attestation primitives.
 //!
-//! This crate replays TCG event logs into PCR values and evaluates the result
-//! against the fleet boot-integrity policy. It is intentionally independent of
-//! the network layer so the policy can be tested against committed fixtures.
+//! This crate replays TCG event logs into PCR values, verifies TPM quote
+//! signatures against a chained AK certificate, and evaluates the fleet
+//! boot-integrity policy. It is independent of the network layer so policy
+//! behaviour can be tested against committed fixtures.
 
-use sha2::{Digest, Sha256};
+pub mod fixtures;
+pub mod policy;
+pub mod quote;
+pub mod replay;
+pub mod types;
 
-/// Extend a PCR with a measurement: `PCR = H(PCR || digest)`.
-pub fn pcr_extend(current: &[u8], digest: &[u8]) -> [u8; 32] {
-    let mut hasher = Sha256::new();
-    hasher.update(current);
-    hasher.update(digest);
-    hasher.finalize().into()
-}
+pub use policy::{Policy, Verdict, Violation};
+pub use quote::{compute_quote_digest, sign_quote, verify_quote_signature};
+pub use replay::{pcr_extend, replay_event_log, POLICY_PCRS};
+pub use types::{AttestationBlob, Distro, SecureBootState, TcgEvent, TpmQuote};
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn extend_matches_manual_sha256() {
-        let pcr = [0u8; 32];
-        let digest = Sha256::digest(b"fleet-boot-event");
-        let extended = pcr_extend(&pcr, &digest);
-
-        let mut manual = Sha256::new();
-        manual.update(pcr);
-        manual.update(digest);
-        let expected: [u8; 32] = manual.finalize().into();
-        assert_eq!(extended, expected);
-    }
-
-    #[test]
-    fn extend_is_not_commutative() {
-        let a = Sha256::digest(b"a");
-        let b = Sha256::digest(b"b");
-        assert_ne!(pcr_extend(&a, &b), pcr_extend(&b, &a));
-    }
+#[derive(Debug, thiserror::Error)]
+pub enum AttestError {
+    #[error("bad PCR digest {0}: {1}")]
+    BadDigest(String, String),
+    #[error("bad nonce: {0}")]
+    BadNonce(String),
+    #[error("PCR {0} is missing from the quote")]
+    MissingPcr(u8),
+    #[error("quote signature error: {0}")]
+    QuoteSignature(String),
+    #[error("AK certificate error: {0}")]
+    AkCertificate(String),
+    #[error("key error: {0}")]
+    Key(String),
+    #[error("certificate error: {0}")]
+    Pki(#[from] fleet_pki::PkiError),
+    #[error("certificate generation error: {0}")]
+    Rcgen(#[from] rcgen::Error),
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("JSON error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("YAML error: {0}")]
+    Yaml(#[from] serde_yaml::Error),
+    #[error("fixture error: {0}")]
+    Fixture(String),
 }

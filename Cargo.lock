@@ -574,11 +574,20 @@ name = "fleet-attest"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
+ "fleet-pki",
  "hex",
+ "p256",
+ "pem 3.0.6",
+ "rand 0.8.8",
+ "rcgen",
  "serde",
+ "serde_json",
  "serde_yaml",
  "sha2",
+ "tempfile",
  "thiserror 2.0.21",
+ "time",
+ "x509-parser 0.16.0",
 ]
 
 [[package]]

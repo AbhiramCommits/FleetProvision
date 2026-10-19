@@ -1,0 +1,26 @@
+version: 1
+name: boot-integrity
+description: FleetProvision UEFI Secure Boot + TPM PCR boot-integrity policy. Generated alongside fixtures so allowlists and measurements cannot drift.
+require_secure_boot: true
+require_setup_mode_off: true
+pcr_indices:
+- 0
+- 2
+- 4
+- 7
+- 11
+allowed_pcr0:
+- 2b551df3c328846c2ee23676a98f99cea7ba18716d9195914ef4822b4ad28086
+allowed_pcr4:
+  fedora:
+  - e2fc9c28862ed6ec20f959031209c2b5c71d44d9c3aa9822fe49825788ed518b
+  ubuntu:
+  - 5a6a90db225b399d8be7aacd8cfbb2cef682ea176dd2c9695b2cd805d7ba46a7
+allowed_pcr7:
+- 3865aaf4bd21dda2bc410da38d798516e822372da61274f79893cd7fad17fb26
+allowed_pcr11:
+- 72375ce3a9bb503494a3d327efa3d3486b1af24452ffff51e501955cff80f8b9
+- 51a70eb9426bf4da033728d32afcb6b185f7b2ab4524911181d97b50a0e16302
+known_bad_shim_dbx:
+- 52bd417da77798bd07dd6c6b2215bd3aa6c811c86befd410e2b8fd4a3e4173f1
+on_fail: quarantine

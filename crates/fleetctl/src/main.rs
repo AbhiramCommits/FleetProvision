@@ -379,9 +379,48 @@ async fn print_json_response(response: reqwest::Response) -> anyhow::Result<()> 
 
 fn run_attest(command: AttestCommand) -> anyhow::Result<()> {
     match command {
-        AttestCommand::Check { fixture, policy } => {
-            let _ = (fixture, policy);
-            bail!("attestation checks are not available in this build")
+        AttestCommand::Check {
+            fixture,
+            policy,
+            ca_bundle,
+        } => {
+            let policy = fleet_attest::Policy::load(&policy)
+                .with_context(|| format!("loading policy {}", policy.display()))?;
+            let blob: fleet_attest::AttestationBlob = serde_json::from_slice(
+                &std::fs::read(&fixture)
+                    .with_context(|| format!("reading fixture {}", fixture.display()))?,
+            )?;
+            let verdict = if ca_bundle.exists() {
+                let ca = std::fs::read_to_string(&ca_bundle)?;
+                policy.evaluate_with_ca(&blob, &ca)
+            } else {
+                policy.evaluate(&blob)
+            };
+            let name = fixture
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("<fixture>");
+            println!("{:<26} {:<6} violations", "fixture", "result");
+            println!("{}", "-".repeat(78));
+            println!(
+                "{:<26} {:<6} {}",
+                name,
+                if verdict.is_pass() { "PASS" } else { "FAIL" },
+                if verdict.is_pass() {
+                    "-".to_string()
+                } else {
+                    verdict
+                        .violations()
+                        .iter()
+                        .map(|v| format!("{}: {}", v.code(), v))
+                        .collect::<Vec<_>>()
+                        .join("; ")
+                }
+            );
+            if !verdict.is_pass() {
+                std::process::exit(2);
+            }
+            Ok(())
         }
     }
 }

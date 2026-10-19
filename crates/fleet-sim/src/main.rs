@@ -59,10 +59,14 @@ fn main() -> anyhow::Result<()> {
             "bench harness not available in this build (output {})",
             out.display()
         ),
-        Command::GenFixtures { out } => anyhow::bail!(
-            "fixture generator not available in this build (output {})",
-            out.display()
-        ),
+        Command::GenFixtures { out } => {
+            let policy = std::path::Path::new("policy/boot-integrity.yaml");
+            let written = fleet_attest::fixtures::generate(&out, policy)?;
+            for path in written {
+                println!("wrote {path}");
+            }
+            Ok(())
+        }
         Command::RenderIpxe { inventory, out } => anyhow::bail!(
             "iPXE renderer not available in this build ({} -> {})",
             inventory.display(),

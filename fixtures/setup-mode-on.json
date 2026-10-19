@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "node_id": "setup-mode-on",
+  "site": "dc1",
+  "hostname": "ubuntu-good",
+  "distro": "ubuntu",
+  "firmware": "Dell Inc. 2.19.0 UEFI",
+  "captured_at": 1790000000,
+  "challenge": "0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0",
+  "secure_boot": {
+    "secure_boot": true,
+    "setup_mode": true,
+    "pk": [
+      "f928354722ea6f9887f5d9c99688ceebc30de96d2c5a49f409a48a4aca04ecd9"
+    ],
+    "kek": [
+      "d2869db4d88b68f1e9a4a82a64820e835e1712e2b54203d11162f6dae56dec37"
+    ],
+    "db": [
+      "5e7ae2feb0627b557ba858a94f66bc6c5c80311cef3332e4fea60806b528371f",
+      "49ed293b73c6e65fcbb2d4d46e0aeeb73252c05d448cdcd6dd1b098ff10fadc5"
+    ],
+    "dbx": [
+      "52bd417da77798bd07dd6c6b2215bd3aa6c811c86befd410e2b8fd4a3e4173f1",
+      "fa9d12221212aef40d9a08b9165c18b61df7c7195c7661f4422dfa9ac3bd1a43"
+    ]
+  },
+  "quote": {
+    "pcr_selection": [
+      0,
+      2,
+      4,
+      7,
+      11
+    ],
+    "pcr_values": {
+      "0": "2b551df3c328846c2ee23676a98f99cea7ba18716d9195914ef4822b4ad28086",
+      "11": "72375ce3a9bb503494a3d327efa3d3486b1af24452ffff51e501955cff80f8b9",
+      "2": "8f3882409b2e7b3a6bdfb1c625ed6751a7b49c9c5c20f04c68cfdb5843a784c0",
+      "4": "5a6a90db225b399d8be7aacd8cfbb2cef682ea176dd2c9695b2cd805d7ba46a7",
+      "7": "3865aaf4bd21dda2bc410da38d798516e822372da61274f79893cd7fad17fb26"
+    },
+    "digest": "bbafdcb8c3982abbc40560a426894c568acf83f488ce751e96a856a10ea79a44",
+    "signature": "MEYCIQDHiFysqBvtHGUufo+dlI4OIglyVYzZpVrpXRe3vGtdMQIhAJTl4W9wnlY3O+seqhzDtipJmFwR34B4ikt/U+KYcYwX",
+    "nonce": "0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0"
+  },
+  "event_log": [
+    {
+      "pcr": 0,
+      "digest": "c9dcf9ae30e77bc780e7f9b629a2f90770a01afc72a17c97cc296af681fbc2d9",
+      "event_type": "EV_ACTION",
+      "description": "UEFI firmware: Dell Inc. 2.19.0 UEFI"
+    },
+    {
+      "pcr": 2,
+      "digest": "6d0eb617ad6879a142fbeb147709416fbae8ebe29c44ee46cf72578bd62fd05a",
+      "event_type": "EV_ACTION",
+      "description": "option rom: virtio-net"
+    },
+    {
+      "pcr": 2,
+      "digest": "d9a634ebf0d836fdb823e576a64ba193621e943cb677813aedab9e7f3cd60fba",
+      "event_type": "EV_ACTION",
+      "description": "firmware configuration"
+    },
+    {
+      "pcr": 4,
+      "digest": "3c43f3bf232ce811ad51adc76fccb919bd15719106c5453bf568acb60d211271",
+      "event_type": "EV_ACTION",
+      "description": "bootloader: ubuntu shim 15.8 + grub 2.12"
+    },
+    {
+      "pcr": 7,
+      "digest": "b160285a91d4a5dfff7d949c1233a0f148fb222c8c6ceca3a8d80e57a0256d6b",
+      "event_type": "EV_ACTION",
+      "description": "secure boot policy: SecureBoot policy PK/KEK/db"
+    },
+    {
+      "pcr": 11,
+      "digest": "c4c59377501e275acf5c254e80a5a9b328f08526f07d985ba883ebff602e7827",
+      "event_type": "EV_ACTION",
+      "description": "kernel cmdline: root=UUID=ubuntu ro quiet splash"
+    }
+  ],
+  "ak_cert_pem": "-----BEGIN CERTIFICATE-----\nMIICNTCCAdugAwIBAgIQE+jc1XEnNK04G4zWXq0IJjAKBggqhkjOPQQDAjBKMS8w\nLQYDVQQDDCZGbGVldFByb3Zpc2lvbiBJc3N1aW5nIENBIGRjMSAxMmFmZTU0NzEX\nMBUGA1UECgwORmxlZXRQcm92aXNpb24wHhcNMjYxMDE5MTk0NjM3WhcNMjcwMTE3\nMTk1MTM3WjAzMRQwEgYDVQQDDAthay1maXh0dXJlczEbMBkGA1UECgwSRmxlZXRQ\ncm92aXNpb24gZGMxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0PQrzEehenu+\ni4qzQs0SV6ACzdaxgNAeltS0/txnXPtgs4hTUzjt/eaoQI81/3nih9UbW7LGRIc+\nM7/wrA3yuaOBuTCBtjAfBgNVHSMEGDAWgBTyRyydyGLsmqHl5MXGNmNl6/5yeTA+\nBgNVHREENzA1ghphay1maXh0dXJlcy5mbGVldC5pbnRlcm5hbIYXZmxlZXQ6Ly9k\nYzEvYWstZml4dHVyZXMwDgYDVR0PAQH/BAQDAgeAMBMGA1UdJQQMMAoGCCsGAQUF\nBwMCMC4GA1UdHwQnMCUwI6AhoB+GHWh0dHBzOi8vMTI3LjAuMC4xOjg0NDMvdjEv\nY3JsMAoGCCqGSM49BAMCA0gAMEUCIQDqZihwpHL9StEZm6uemEMsLaBbrSxYTUmy\nVdRREr/L8gIgb1gTdHpOL9Ao5Deg/3HmgQeyzcil7+nrhcgu7cvjtLs=\n-----END CERTIFICATE-----\n"
+}

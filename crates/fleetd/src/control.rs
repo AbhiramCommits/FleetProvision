@@ -37,6 +37,7 @@ pub struct ControlConfig {
     pub operator_listen: SocketAddr,
     pub token_key: Option<PathBuf>,
     pub site: String,
+    pub policy: PathBuf,
 }
 
 impl ControlConfig {
@@ -48,6 +49,7 @@ impl ControlConfig {
             operator_listen: args.operator_listen,
             token_key: args.token_key.clone(),
             site: "dc1".into(),
+            policy: args.policy.clone(),
         }
     }
 }
@@ -67,6 +69,7 @@ pub struct AppState {
     pub trust: Arc<TrustMaterial>,
     pub challenges: Arc<Mutex<BTreeMap<String, Challenge>>>,
     pub site: String,
+    pub policy: Arc<fleet_attest::Policy>,
 }
 
 /// A running control plane. Drop the value or call [`shutdown`](Self::shutdown)
@@ -111,6 +114,12 @@ pub async fn start(config: ControlConfig) -> anyhow::Result<RunningControlPlane>
     let crl = Arc::new(RwLock::new(ca.crl_store()?));
     let store = Store::load(&config.state_dir, config.token_key.as_deref())?;
     let metrics = Arc::new(Metrics::new());
+    let policy = Arc::new(fleet_attest::Policy::load(&config.policy).map_err(|e| {
+        anyhow::anyhow!(
+            "failed to load boot-integrity policy {}: {e}",
+            config.policy.display()
+        )
+    })?);
 
     let (server_chain, server_key) = ensure_server_cert(&mut ca, &config.state_dir, &config.site)?;
     let mtls_config = tls::mtls_server_config(
@@ -137,6 +146,7 @@ pub async fn start(config: ControlConfig) -> anyhow::Result<RunningControlPlane>
         trust: trust.clone(),
         challenges: Arc::new(Mutex::new(BTreeMap::new())),
         site: config.site.clone(),
+        policy,
     };
 
     let mtls_app = node_router(state.clone());
@@ -248,6 +258,7 @@ fn enroll_router(state: AppState) -> Router {
     Router::new()
         .route("/healthz", get(health))
         .route("/v1/attest/challenge", post(challenge))
+        .route("/v1/ak", post(issue_ak))
         .route("/v1/enroll", post(enroll))
         .with_state(state)
 }
@@ -513,10 +524,44 @@ fn token_failure(err: &crate::tokens::TokenError) -> ApiFailure {
     }
 }
 
+async fn issue_ak(
+    State(state): State<AppState>,
+    Json(req): Json<fleet_proto::AkCertRequest>,
+) -> Result<Json<fleet_proto::AkCertResponse>, ApiFailure> {
+    let store = state.store.lock().await;
+    let payload = match store.tokens.peek(&req.token) {
+        Ok(payload) => payload,
+        Err(err) => return Err(token_failure(&err)),
+    };
+    drop(store);
+    if payload.node_id.starts_with("operator-") {
+        return Err(failure(
+            StatusCode::FORBIDDEN,
+            "reserved_identity",
+            "operator- prefix is reserved for human identities",
+        ));
+    }
+    let spec = LeafSpec::for_node(payload.site.clone(), format!("ak-{}", payload.node_id))
+        .with_hostname(format!("ak-{}", payload.node_id))
+        .with_csr(req.csr_pem);
+    let issued = {
+        let mut ca = state.ca.lock().await;
+        ca.issue_leaf(&spec)
+            .map_err(|e| failure(StatusCode::BAD_REQUEST, "ak_csr_invalid", e.to_string()))?
+    };
+    Ok(Json(fleet_proto::AkCertResponse {
+        node_id: payload.node_id,
+        cert_pem: issued.cert_pem,
+        serial_hex: issued.serial_hex,
+    }))
+}
+
 async fn enroll(
     State(state): State<AppState>,
     Json(req): Json<EnrollRequest>,
 ) -> Result<Json<EnrollResponse>, ApiFailure> {
+    use fleet_proto::NodeState;
+
     if req.node_id.starts_with("operator-") {
         state.metrics.rejection("reserved_identity");
         return Err(failure(
@@ -543,7 +588,7 @@ async fn enroll(
         ));
     }
     if let Some(existing) = store.get(&req.node_id) {
-        if existing.state == fleet_proto::NodeState::Revoked {
+        if existing.state == NodeState::Revoked {
             state.metrics.rejection("revoked");
             return Err(failure(
                 StatusCode::FORBIDDEN,
@@ -553,19 +598,36 @@ async fn enroll(
         }
     }
 
-    // Step 4 replaces this with full attestation evaluation. Until then the
-    // nonce binding is still enforced when a challenge was requested.
-    if let Some(nonce) = req.attestation.get("nonce").and_then(|v| v.as_str()) {
+    let blob = match fleet_attest::AttestationBlob::from_json_value(&req.attestation) {
+        Ok(blob) => blob,
+        Err(err) => {
+            state.metrics.rejection("attestation_malformed");
+            return Err(failure(
+                StatusCode::BAD_REQUEST,
+                "attestation_malformed",
+                format!("could not parse attestation blob: {err}"),
+            ));
+        }
+    };
+    if blob.node_id != req.node_id || blob.site != req.site {
+        state.metrics.rejection("attestation_identity_mismatch");
+        return Err(failure(
+            StatusCode::FORBIDDEN,
+            "attestation_identity_mismatch",
+            "attestation node identity does not match the enrollment request",
+        ));
+    }
+
+    let expected_nonce = {
         let challenges = state.challenges.lock().await;
         match challenges.get(&payload.id) {
-            Some(challenge)
-                if challenge.nonce == nonce && challenge.expires_at > crate::unix_now() => {}
+            Some(challenge) if challenge.expires_at > crate::unix_now() => challenge.nonce.clone(),
             Some(_) => {
-                state.metrics.rejection("nonce_mismatch");
+                state.metrics.rejection("challenge_expired");
                 return Err(failure(
                     StatusCode::FORBIDDEN,
-                    "nonce_mismatch",
-                    "attestation nonce does not match the issued challenge",
+                    "challenge_expired",
+                    "attestation challenge has expired",
                 ));
             }
             None => {
@@ -577,18 +639,67 @@ async fn enroll(
                 ));
             }
         }
+    };
+    if blob.challenge != expected_nonce {
+        state.metrics.rejection("replayed_nonce");
+        return Err(failure(
+            StatusCode::FORBIDDEN,
+            "replayed_nonce",
+            "attestation challenge does not match the issued nonce",
+        ));
     }
 
+    let verdict = state.policy.evaluate_with_ca(&blob, &state.trust.pem);
     let mut record = store
         .get(&req.node_id)
         .cloned()
         .unwrap_or_else(|| NodeRecord::pending(&req.node_id, &req.site, &req.hostname));
     record.hostname = req.hostname.clone();
-    if record.state != fleet_proto::NodeState::Enrolled {
-        record.state = fleet_proto::NodeState::Attested;
+
+    if let fleet_attest::Verdict::Fail(violations) = verdict {
+        let messages: Vec<String> = violations
+            .iter()
+            .map(|v| format!("{}: {v}", v.code()))
+            .collect();
+        for violation in &violations {
+            state.metrics.rejection(violation.code());
+        }
+        record.state = NodeState::Quarantined;
+        record.attestation_passed = false;
+        record.violations = messages.clone();
+        record.vlan = Some(666);
+        record.last_seen = crate::unix_now();
+        if let Err(err) = store.upsert(record.clone()) {
+            return Err(failure(
+                StatusCode::CONFLICT,
+                "state_transition",
+                err.to_string(),
+            ));
+        }
+        store.tokens.consume(&payload.id);
+        let _ = store.save();
+        state.challenges.lock().await.remove(&payload.id);
+        warn!(
+            node_id = %req.node_id,
+            violations = ?messages,
+            "attestation failed; node quarantined"
+        );
+        return Err(ApiFailure {
+            status: StatusCode::FORBIDDEN,
+            body: ApiError {
+                error: "boot-integrity policy failed; node quarantined".into(),
+                code: "attestation_failed".into(),
+                violations: messages,
+            },
+        });
+    }
+
+    if record.state != NodeState::Enrolled {
+        record.state = NodeState::Attested;
     }
     record.attestation_passed = true;
     record.violations.clear();
+    record.vlan = Some(100);
     if let Err(err) = store.upsert(record.clone()) {
         return Err(failure(
             StatusCode::CONFLICT,
@@ -617,11 +728,11 @@ async fn enroll(
     };
 
     let mut store = state.store.lock().await;
-    record.state = fleet_proto::NodeState::Enrolled;
+    record.state = NodeState::Enrolled;
     record.serial_hex = Some(issued.serial_hex.clone());
     record.cert_pem = Some(issued.cert_pem.clone());
     record.not_after = Some(issued.identity.not_after);
-    record.vlan = Some(666);
+    record.vlan = Some(100);
     record.last_seen = crate::unix_now();
     if let Err(err) = store.upsert(record.clone()) {
         return Err(failure(

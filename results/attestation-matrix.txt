@@ -1,0 +1,17 @@
+# FleetProvision attestation matrix
+
+Generated 2026-10-19T19:51:45Z on Darwin 27.0.0 arm64.
+
+Command: fleetctl attest check --fixture <fixture> --policy policy/boot-integrity.yaml --ca-bundle fixtures/ca.pem
+
+fixture                    result violations
+------------------------------------------------------------------------------
+fedora-good.json           PASS   -
+forged-quote.json          FAIL   forged_quote: quote signature invalid: quote signature error: signature error
+log-quote-mismatch.json    FAIL   log_quote_mismatch: PCR4 replayed to be7ad2f738ef9fe695eb7c34f2b1e366c952e142cfcf406ab11e040e17aa32ca but quote says 5a6a90db225b399d8be7aacd8cfbb2cef682ea176dd2c9695b2cd805d7ba46a7
+replayed-nonce.json        FAIL   replayed_nonce: quote nonce 0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0 does not match enrollment challenge ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+secureboot-off.json        FAIL   secure_boot_disabled: SecureBoot is disabled
+setup-mode-on.json         FAIL   setup_mode_enabled: SetupMode is enabled
+tampered-shim.json         FAIL   pcr_not_allowed: PCR4 value 0b4d7d41f6ee39992f5cb5e1111cbb60311e16dbf3525e8b0cefbc4346012b47 is not in the allowlist
+ubuntu-good.json           PASS   -
+unknown-firmware.json      FAIL   pcr_not_allowed: PCR0 value 0362f544b58004f1920568696d9d12df4aa1da4a9736968d83fbf7f160a65067 is not in the allowlist

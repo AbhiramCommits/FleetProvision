@@ -1,6 +1,6 @@
 # FleetProvision control-plane e2e
 
-Generated 2026-10-19T19:40:30Z on Darwin 27.0.0 arm64.
+Generated 2026-10-19T19:51:12Z on Darwin 27.0.0 arm64.
 
 == enrolled nodes ==
 {
@@ -8,41 +8,41 @@ Generated 2026-10-19T19:40:30Z on Darwin 27.0.0 arm64.
   "nodes": [
     {
       "attestation_passed": true,
-      "created_at": 1792438830,
+      "created_at": 1792439472,
       "hostname": "n1",
-      "last_seen": 1792438830,
+      "last_seen": 1792439472,
       "node_id": "n1",
-      "not_after": 1800214830,
-      "serial_hex": "5b4a9891e428a2e252d85de0bacce8be",
+      "not_after": 1800215472,
+      "serial_hex": "74c516163ba2bf778c1218398e0d697b",
       "site": "dc1",
       "state": "enrolled",
       "violations": [],
-      "vlan": 666
+      "vlan": 100
     },
     {
       "attestation_passed": true,
-      "created_at": 1792438830,
+      "created_at": 1792439472,
       "hostname": "n2",
-      "last_seen": 1792438830,
+      "last_seen": 1792439472,
       "node_id": "n2",
-      "not_after": 1800214830,
-      "serial_hex": "2c44dd7c51161879456c8e81cdf250ab",
+      "not_after": 1800215472,
+      "serial_hex": "4496ad34183abe33fd04662dacf4d36d",
       "site": "dc1",
       "state": "enrolled",
       "violations": [],
-      "vlan": 666
+      "vlan": 100
     }
   ]
 }
 == revoking n2 ==
 {
   "attestation_passed": true,
-  "created_at": 1792438830,
+  "created_at": 1792439472,
   "hostname": "n2",
-  "last_seen": 1792438830,
+  "last_seen": 1792439472,
   "node_id": "n2",
-  "not_after": 1800214830,
-  "serial_hex": "2c44dd7c51161879456c8e81cdf250ab",
+  "not_after": 1800215472,
+  "serial_hex": "4496ad34183abe33fd04662dacf4d36d",
   "site": "dc1",
   "state": "revoked",
   "violations": [],
@@ -53,11 +53,11 @@ curl: (56) LibreSSL SSL_read: LibreSSL/3.3.6: error:1404C414:SSL routines:ST_OK:
 
 ## fleetd log (real lines)
 ```
-[2m2026-10-19T19:40:30.034941Z[0m [32m INFO[0m [2mfleetd[0m[2m:[0m fleetd starting [3mstate_dir[0m[2m=[0mout/e2e-control-plane/state [3mlisten[0m[2m=[0m127.0.0.1:54558 [3menroll_listen[0m[2m=[0m127.0.0.1:54559 [3moperator_listen[0m[2m=[0m127.0.0.1:54560
-[2m2026-10-19T19:40:30.039894Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m control plane listening [3mmtls_addr[0m[2m=[0m127.0.0.1:54558 [3menroll_addr[0m[2m=[0m127.0.0.1:54559 [3moperator_addr[0m[2m=[0m127.0.0.1:54560
-[2m2026-10-19T19:40:30.039950Z[0m [32m INFO[0m [2mfleetd[0m[2m:[0m fleetd ready [3mmtls[0m[2m=[0m127.0.0.1:54558 [3menroll[0m[2m=[0m127.0.0.1:54559 [3moperator[0m[2m=[0m127.0.0.1:54560
-[2m2026-10-19T19:40:30.592598Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node enrolled [3mnode_id[0m[2m=[0mn1 [3mserial[0m[2m=[0m5b4a9891e428a2e252d85de0bacce8be
-[2m2026-10-19T19:40:30.604836Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node enrolled [3mnode_id[0m[2m=[0mn2 [3mserial[0m[2m=[0m2c44dd7c51161879456c8e81cdf250ab
-[2m2026-10-19T19:40:30.631333Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node revoked [3mnode_id[0m[2m=[0mn2 [3mreason[0m[2m=[0mkey_compromise
-[2m2026-10-19T19:40:30.643072Z[0m [33m WARN[0m [2mfleetd::control[0m[2m:[0m tls handshake rejected [3merror[0m[2m=[0minvalid peer certificate: Revoked
+[2m2026-10-19T19:51:11.992315Z[0m [32m INFO[0m [2mfleetd[0m[2m:[0m fleetd starting [3mstate_dir[0m[2m=[0mout/e2e-control-plane/state [3mlisten[0m[2m=[0m127.0.0.1:56096 [3menroll_listen[0m[2m=[0m127.0.0.1:56097 [3moperator_listen[0m[2m=[0m127.0.0.1:56098
+[2m2026-10-19T19:51:11.999091Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m control plane listening [3mmtls_addr[0m[2m=[0m127.0.0.1:56096 [3menroll_addr[0m[2m=[0m127.0.0.1:56097 [3moperator_addr[0m[2m=[0m127.0.0.1:56098
+[2m2026-10-19T19:51:11.999137Z[0m [32m INFO[0m [2mfleetd[0m[2m:[0m fleetd ready [3mmtls[0m[2m=[0m127.0.0.1:56096 [3menroll[0m[2m=[0m127.0.0.1:56097 [3moperator[0m[2m=[0m127.0.0.1:56098
+[2m2026-10-19T19:51:12.691619Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node enrolled [3mnode_id[0m[2m=[0mn1 [3mserial[0m[2m=[0m74c516163ba2bf778c1218398e0d697b
+[2m2026-10-19T19:51:12.721348Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node enrolled [3mnode_id[0m[2m=[0mn2 [3mserial[0m[2m=[0m4496ad34183abe33fd04662dacf4d36d
+[2m2026-10-19T19:51:12.759435Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node revoked [3mnode_id[0m[2m=[0mn2 [3mreason[0m[2m=[0mkey_compromise
+[2m2026-10-19T19:51:12.774391Z[0m [33m WARN[0m [2mfleetd::control[0m[2m:[0m tls handshake rejected [3merror[0m[2m=[0minvalid peer certificate: Revoked
 ```

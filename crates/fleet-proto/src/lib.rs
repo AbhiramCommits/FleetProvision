@@ -34,6 +34,7 @@ impl NodeState {
                 | (Enrolled, Quarantined)
                 | (Enrolled, Revoked)
                 | (Quarantined, Revoked)
+                | (Quarantined, Attested)
                 | (Quarantined, Enrolled)
         )
     }
@@ -75,6 +76,21 @@ pub struct CreateTokenResponse {
     pub node_id: String,
     pub site: String,
     pub expires_at: i64,
+}
+
+/// Bootstrap request for a simulated TPM endorsement/AK certificate. The AK
+/// is only used to sign quotes; it is not a TLS identity.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AkCertRequest {
+    pub token: String,
+    pub csr_pem: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AkCertResponse {
+    pub node_id: String,
+    pub cert_pem: String,
+    pub serial_hex: String,
 }
 
 /// A node asks for a fresh nonce before producing a TPM quote.

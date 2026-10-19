@@ -1,5 +1,7 @@
 //! End-to-end tests over real TLS sockets and ephemeral ports.
 
+use fleet_attest::fixtures::{build_blob, generate_ak_keypair, issue_ak_cert, BlobOptions};
+use fleet_attest::{AttestationBlob, Distro};
 use fleet_pki::{Ca, CaConfig, LeafSpec, LeafUsage, NodeKeypair};
 use fleet_proto::{
     ChallengeRequest, ChallengeResponse, CreateTokenRequest, CreateTokenResponse, EnrollRequest,
@@ -23,6 +25,10 @@ fn free_port() -> SocketAddr {
     let addr = listener.local_addr().unwrap();
     drop(listener);
     addr
+}
+
+fn policy_path() -> std::path::PathBuf {
+    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../policy/boot-integrity.yaml")
 }
 
 fn init_ca(dir: &Path) -> Ca {
@@ -52,6 +58,7 @@ async fn harness() -> Harness {
         operator_listen: free_port(),
         token_key: None,
         site: "dc1".into(),
+        policy: policy_path(),
     })
     .await
     .unwrap();
@@ -102,6 +109,18 @@ struct Enrolled {
 }
 
 async fn enroll_node(h: &Harness, node_id: &str, token: &str) -> Result<Enrolled, String> {
+    enroll_with(h, node_id, token, |_| {}).await
+}
+
+async fn enroll_with<F>(
+    h: &Harness,
+    node_id: &str,
+    token: &str,
+    mutate: F,
+) -> Result<Enrolled, String>
+where
+    F: FnOnce(&mut AttestationBlob),
+{
     let client = tls_client(&h.ca_pem, None);
     let keypair = NodeKeypair::new(node_id, "dc1").unwrap();
     let challenge_response = client
@@ -122,13 +141,25 @@ async fn enroll_node(h: &Harness, node_id: &str, token: &str) -> Result<Enrolled
     }
     let challenge: ChallengeResponse =
         challenge_response.json().await.map_err(|e| e.to_string())?;
+
+    let mut ca = Ca::load(h._dir.path()).unwrap();
+    let (_, ak_csr, ak_key) = generate_ak_keypair().unwrap();
+    let ak_cert = issue_ak_cert(&mut ca, node_id, "dc1", &ak_csr).unwrap();
+    let mut blob = build_blob(
+        &ak_cert,
+        &ak_key,
+        &BlobOptions::good(node_id, "dc1", Distro::Ubuntu, &challenge.nonce),
+    )
+    .unwrap();
+    mutate(&mut blob);
+
     let request = EnrollRequest {
         token: token.into(),
         node_id: node_id.into(),
         site: "dc1".into(),
         hostname: node_id.into(),
         csr_pem: keypair.csr_pem().to_string(),
-        attestation: serde_json::json!({"nonce": challenge.nonce}),
+        attestation: serde_json::to_value(&blob).unwrap(),
     };
     let response = client
         .post(format!("https://{}/v1/enroll", h.running.enroll_addr))
@@ -336,6 +367,7 @@ async fn server_restart_preserves_enrollment_state() {
         operator_listen: free_port(),
         token_key: None,
         site: "dc1".into(),
+        policy: policy_path(),
     })
     .await
     .unwrap();
@@ -532,4 +564,109 @@ async fn re_enrollment_with_a_fresh_token_rotates_the_serial() {
         nodes.nodes[0].serial_hex.as_deref(),
         Some(second.response.serial_hex.as_str())
     );
+}
+
+#[tokio::test]
+async fn secure_boot_off_is_quarantined_without_a_certificate() {
+    let h = harness().await;
+    let token = issue_token(&h, "q1").await;
+    let err = enroll_with(&h, "q1", &token, |blob| {
+        blob.secure_boot.secure_boot = false;
+    })
+    .await
+    .unwrap_err();
+    assert!(err.contains("attestation_failed"), "{err}");
+    assert!(err.contains("SecureBoot is disabled"), "{err}");
+
+    let nodes = list_nodes(&h).await;
+    assert_eq!(nodes.count, 1);
+    let node = &nodes.nodes[0];
+    assert_eq!(node.state, fleet_proto::NodeState::Quarantined);
+    assert!(node.serial_hex.is_none());
+    assert!(!node.attestation_passed);
+    assert!(node.violations.iter().any(|v| v.contains("SecureBoot")));
+    assert_eq!(node.vlan, Some(666));
+}
+
+#[tokio::test]
+async fn forged_quote_and_log_mismatch_are_rejected() {
+    use base64::Engine;
+    let h = harness().await;
+
+    let token = issue_token(&h, "q2").await;
+    let err = enroll_with(&h, "q2", &token, |blob| {
+        blob.quote.signature = base64::engine::general_purpose::STANDARD.encode([0u8; 8]);
+    })
+    .await
+    .unwrap_err();
+    assert!(err.contains("forged_quote"), "{err}");
+
+    let token = issue_token(&h, "q3").await;
+    let err = enroll_with(&h, "q3", &token, |blob| {
+        for event in &mut blob.event_log {
+            if event.pcr == 4 {
+                event.digest = "11".repeat(32);
+            }
+        }
+    })
+    .await
+    .unwrap_err();
+    assert!(err.contains("log_quote_mismatch"), "{err}");
+}
+
+#[tokio::test]
+async fn ak_certificate_from_a_foreign_ca_is_rejected() {
+    let h = harness().await;
+    let token = issue_token(&h, "q4").await;
+    let mut foreign = Ca::init_root(CaConfig::default()).unwrap();
+    let (_, csr, _) = generate_ak_keypair().unwrap();
+    let foreign_ak = issue_ak_cert(&mut foreign, "q4", "dc1", &csr).unwrap();
+    let err = enroll_with(&h, "q4", &token, |blob| {
+        blob.ak_cert_pem = foreign_ak.clone();
+    })
+    .await
+    .unwrap_err();
+    assert!(err.contains("ak_chain_untrusted"), "{err}");
+}
+
+#[tokio::test]
+async fn replayed_nonce_and_missing_challenge_fail_closed() {
+    let h = harness().await;
+    let token = issue_token(&h, "q5").await;
+    let err = enroll_with(&h, "q5", &token, |blob| {
+        blob.challenge = fleet_attest::fixtures::REPLAYED_NONCE.into();
+    })
+    .await
+    .unwrap_err();
+    assert!(err.contains("replayed_nonce"), "{err}");
+
+    // Direct enrollment without requesting a challenge is refused.
+    let token = issue_token(&h, "q6").await;
+    let client = tls_client(&h.ca_pem, None);
+    let keypair = NodeKeypair::new("q6", "dc1").unwrap();
+    let mut ca = Ca::load(h._dir.path()).unwrap();
+    let (_, ak_csr, ak_key) = generate_ak_keypair().unwrap();
+    let ak_cert = issue_ak_cert(&mut ca, "q6", "dc1", &ak_csr).unwrap();
+    let blob = build_blob(
+        &ak_cert,
+        &ak_key,
+        &BlobOptions::good("q6", "dc1", Distro::Ubuntu, "aa"),
+    )
+    .unwrap();
+    let response = client
+        .post(format!("https://{}/v1/enroll", h.running.enroll_addr))
+        .json(&EnrollRequest {
+            token,
+            node_id: "q6".into(),
+            site: "dc1".into(),
+            hostname: "q6".into(),
+            csr_pem: keypair.csr_pem().to_string(),
+            attestation: serde_json::to_value(&blob).unwrap(),
+        })
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 403);
+    let body = response.text().await.unwrap();
+    assert!(body.contains("missing_challenge"), "{body}");
 }

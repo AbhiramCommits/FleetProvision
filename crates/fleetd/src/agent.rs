@@ -1,9 +1,12 @@
 //! On-node agent: enrollment, certificate installation, and renewal.
 
 use crate::control::renewal_threshold;
+use fleet_attest::fixtures::{build_blob, generate_ak_keypair, BlobOptions};
+use fleet_attest::Distro;
 use fleet_pki::NodeKeypair;
 use fleet_proto::{
-    ApiError, ChallengeRequest, ChallengeResponse, EnrollRequest, EnrollResponse, RenewRequest,
+    AkCertRequest, AkCertResponse, ApiError, ChallengeRequest, ChallengeResponse, EnrollRequest,
+    EnrollResponse, RenewRequest,
 };
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -20,6 +23,7 @@ pub struct EnrollConfig {
     pub site: String,
     pub hostname: String,
     pub ca_bundle: PathBuf,
+    pub distro: Distro,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -58,17 +62,45 @@ pub async fn enroll(config: &EnrollConfig) -> anyhow::Result<EnrollResponse> {
     let http = client(&trust_pem, None)?;
     let keypair = NodeKeypair::new(&config.node_id, &config.site)?;
 
-    let challenge: ChallengeResponse = http
+    // Simulated TPM provisioning: the AK key pair is generated on the node and
+    // its public key is certified by the fleet CA through the token-gated
+    // enrollment listener.
+    let (ak_key_pem, ak_csr_pem, ak_signing_key) = generate_ak_keypair()?;
+    let ak_response = http
+        .post(format!("{}/v1/ak", config.enroll_url))
+        .json(&AkCertRequest {
+            token: config.token.clone(),
+            csr_pem: ak_csr_pem,
+        })
+        .send()
+        .await?;
+    if !ak_response.status().is_success() {
+        return Err(send_error(ak_response).await);
+    }
+    let ak: AkCertResponse = ak_response.json().await?;
+
+    let challenge_response = http
         .post(format!("{}/v1/attest/challenge", config.enroll_url))
         .json(&ChallengeRequest {
             token: config.token.clone(),
         })
         .send()
-        .await?
-        .error_for_status()
-        .map_err(|e| anyhow::anyhow!("challenge request failed: {e}"))?
-        .json()
         .await?;
+    if !challenge_response.status().is_success() {
+        return Err(send_error(challenge_response).await);
+    }
+    let challenge: ChallengeResponse = challenge_response.json().await?;
+
+    let blob = build_blob(
+        &ak.cert_pem,
+        &ak_signing_key,
+        &BlobOptions::good(
+            &config.node_id,
+            &config.site,
+            config.distro,
+            &challenge.nonce,
+        ),
+    )?;
 
     let request = EnrollRequest {
         token: config.token.clone(),
@@ -76,7 +108,7 @@ pub async fn enroll(config: &EnrollConfig) -> anyhow::Result<EnrollResponse> {
         site: config.site.clone(),
         hostname: config.hostname.clone(),
         csr_pem: keypair.csr_pem().to_string(),
-        attestation: serde_json::json!({"nonce": challenge.nonce}),
+        attestation: serde_json::to_value(&blob)?,
     };
     let response = http
         .post(format!("{}/v1/enroll", config.enroll_url))
@@ -91,6 +123,12 @@ pub async fn enroll(config: &EnrollConfig) -> anyhow::Result<EnrollResponse> {
     let node_dir = config.state_dir.join("node");
     std::fs::create_dir_all(&node_dir)?;
     write_private(&node_dir.join("node.key.pem"), keypair.key_pem())?;
+    write_private(&node_dir.join("ak.key.pem"), &ak_key_pem)?;
+    std::fs::write(node_dir.join("ak.crt.pem"), &ak.cert_pem)?;
+    std::fs::write(
+        node_dir.join("attestation.json"),
+        serde_json::to_vec_pretty(&blob)?,
+    )?;
     std::fs::write(node_dir.join("node.crt.pem"), &enrolled.cert_pem)?;
     std::fs::write(node_dir.join("node-chain.pem"), &enrolled.chain_pem)?;
     std::fs::write(

@@ -157,6 +157,9 @@ pub enum AttestCommand {
         fixture: PathBuf,
         #[arg(long, default_value = "policy/boot-integrity.yaml")]
         policy: PathBuf,
+        /// Trust bundle used to verify the simulated AK certificate chain.
+        #[arg(long, default_value = "fixtures/ca.pem")]
+        ca_bundle: PathBuf,
     },
 }
 

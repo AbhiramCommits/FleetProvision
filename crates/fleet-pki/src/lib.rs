@@ -923,6 +923,73 @@ pub fn san_identities(der: &[u8]) -> Result<BTreeSet<String>, PkiError> {
     Ok(out)
 }
 
+/// Verify a leaf against a PEM trust bundle (root first, then any
+/// intermediates) for the requested EKU. Used by the attestation crate to
+/// validate the AK certificate, and available to external tooling.
+pub fn verify_chain_with_bundle(
+    leaf_pem: &str,
+    bundle_pem: &str,
+    usage: LeafUsage,
+) -> Result<LeafIdentity, PkiError> {
+    let leaf_der = pem_to_der(leaf_pem, "CERTIFICATE")?;
+    let mut bundle = Vec::new();
+    let mut rest = bundle_pem;
+    while let Ok(block) = pem::parse(rest) {
+        if block.tag() != "CERTIFICATE" {
+            break;
+        }
+        bundle.push(block.into_contents());
+        // Advance past this block by locating the end marker.
+        match rest.find("-----END CERTIFICATE-----") {
+            Some(pos) => {
+                rest = &rest[pos + "-----END CERTIFICATE-----".len()..];
+            }
+            None => break,
+        }
+    }
+    let mut iter = bundle.into_iter();
+    let root_der = iter
+        .next()
+        .ok_or_else(|| PkiError::Pem("empty trust bundle".into()))?;
+    let intermediates: Vec<CertificateDer<'static>> = iter.map(CertificateDer::from).collect();
+
+    let leaf_cert_der = CertificateDer::from(leaf_der.clone());
+    let leaf = webpki::EndEntityCert::try_from(&leaf_cert_der)
+        .map_err(|e| PkiError::Chain(e.to_string()))?;
+    let root_cert = CertificateDer::from(root_der);
+    let anchor =
+        webpki::anchor_from_trusted_cert(&root_cert).map_err(|e| PkiError::Chain(e.to_string()))?;
+    let eku = match usage {
+        LeafUsage::Client => webpki::KeyUsage::client_auth(),
+        LeafUsage::Server => webpki::KeyUsage::server_auth(),
+    };
+    leaf.verify_for_usage(
+        webpki::ALL_VERIFICATION_ALGS,
+        &[anchor],
+        &intermediates,
+        UnixTime::now(),
+        eku,
+        None,
+        None,
+    )
+    .map_err(|e| match e {
+        webpki::Error::CertExpired { .. } => PkiError::Expired,
+        webpki::Error::CertNotValidYet { .. } => PkiError::NotYetValid,
+        webpki::Error::RequiredEkuNotFoundContext(_) => {
+            PkiError::Eku(if usage == LeafUsage::Client {
+                "clientAuth"
+            } else {
+                "serverAuth"
+            })
+        }
+        other => PkiError::Chain(other.to_string()),
+    })?;
+
+    let mut identity = peer_identity(&leaf_der)?;
+    identity.usage = usage;
+    Ok(identity)
+}
+
 /// Identity extracted from a certificate SAN without performing chain
 /// verification. Callers must verify the chain first (for example in the
 /// rustls client-certificate verifier).
