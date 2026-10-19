@@ -1,0 +1,127 @@
+---
+- name: Refresh apt cache on Debian-family hosts
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install base packages required by the fleet agent
+  ansible.builtin.package:
+    name:
+      - ca-certificates
+      - openssh-server
+      - chrony
+      - curl
+    state: present
+
+- name: Create fleet agent configuration directory
+  ansible.builtin.file:
+    path: "{{ fleet_node_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create fleet agent state directory
+  ansible.builtin.file:
+    path: "{{ fleet_node_state_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install fleet-agent binary
+  ansible.builtin.copy:
+    src: "{{ fleet_node_agent_source }}"
+    dest: "{{ fleet_node_agent_install_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the fleet trust bundle
+  ansible.builtin.copy:
+    content: "{{ fleet_node_trust_bundle }}\n"
+    dest: "{{ fleet_node_config_dir }}/trust-bundle.pem"
+    owner: root
+    group: root
+    mode: "0644"
+  when: fleet_node_trust_bundle | length > 0
+
+- name: Template the enrollment environment file
+  ansible.builtin.template:
+    src: fleet-agent-enroll.env.j2
+    dest: "{{ fleet_node_config_dir }}/enroll.env"
+    owner: root
+    group: root
+    mode: "0600"
+  when: fleet_node_bootstrap_token | length > 0
+
+- name: Install systemd enrollment unit
+  ansible.builtin.copy:
+    src: "{{ role_path }}/../../../provisioning/systemd/fleet-agent-enroll.service"
+    dest: /etc/systemd/system/fleet-agent-enroll.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Install systemd renewal unit
+  ansible.builtin.copy:
+    src: "{{ role_path }}/../../../provisioning/systemd/fleet-agent-renew.service"
+    dest: /etc/systemd/system/fleet-agent-renew.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Install systemd renewal timer
+  ansible.builtin.copy:
+    src: "{{ role_path }}/../../../provisioning/systemd/fleet-agent-renew.timer"
+    dest: /etc/systemd/system/fleet-agent-renew.timer
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Template chrony fleet configuration
+  ansible.builtin.template:
+    src: chrony-fleet.conf.j2
+    dest: /etc/chrony/conf.d/fleet.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony
+
+- name: Ensure the sshd privilege separation directory exists
+  ansible.builtin.file:
+    path: /run/sshd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Template sshd hardening drop-in
+  ansible.builtin.template:
+    src: sshd-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-fleet-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Reload sshd
+
+- name: Apply pending unit and service handlers before enabling timers
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start the renewal timer
+  ansible.builtin.systemd:
+    name: fleet-agent-renew.timer
+    enabled: true
+    state: started
+  when: fleet_node_manage_services | bool
+
+- name: Enable the enrollment unit for first boot after re-image
+  ansible.builtin.systemd:
+    name: fleet-agent-enroll.service
+    enabled: true
+  when: fleet_node_manage_services | bool and fleet_node_bootstrap_token | length > 0

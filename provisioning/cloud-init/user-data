@@ -1,0 +1,27 @@
+#cloud-config
+autoinstall:
+  version: 1
+  refresh-installer:
+    update: false
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: fleet-builder
+    username: ubuntu
+    password: "$6$rounds=656000$qDwlIZO6CXoJ6.Tg$m4.hnUfWze9tI7whaeEiKQ.BaUolj2s5pyP64cVBZ4rm7ApSGf2hVt69Zqjp75UmRJfXvia/LZqKmBcBjZ1U30"
+  ssh:
+    install-server: true
+    allow-pw: true
+  packages:
+    - openssh-server
+    - qemu-guest-agent
+    - chrony
+    - ca-certificates
+    - curl
+    - jq
+    - python3
+  late-commands:
+    - curtin in-target -- systemctl enable qemu-guest-agent
+    - curtin in-target -- systemctl enable chrony
+  shutdown: poweroff

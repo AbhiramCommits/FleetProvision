@@ -13,15 +13,23 @@ clap.workspace = true
 fleet-attest = { path = "../fleet-attest" }
 fleet-pki = { path = "../fleet-pki" }
 fleet-proto = { path = "../fleet-proto" }
+fleetd = { path = "../fleetd" }
 hex.workspace = true
 p256.workspace = true
+pem = "3"
 rand.workspace = true
+reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+serde_yaml.workspace = true
 sha2.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+time.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+x509-parser = { version = "0.16", features = ["verify"] }
 
 [dev-dependencies]
 tempfile.workspace = true

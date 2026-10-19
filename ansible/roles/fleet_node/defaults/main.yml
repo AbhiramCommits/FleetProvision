@@ -1,0 +1,13 @@
+---
+fleet_node_site: dc1
+fleet_node_enroll_url: https://fleetd.fleet.internal:8444
+fleet_node_control_plane: https://fleetd.fleet.internal:8443
+fleet_node_agent_source: /tmp/fleet-agent
+fleet_node_agent_install_path: /usr/local/bin/fleet-agent
+fleet_node_agent_distro: ubuntu
+fleet_node_config_dir: /etc/fleet-agent
+fleet_node_state_dir: /var/lib/fleet-agent
+fleet_node_trust_bundle: ""
+fleet_node_bootstrap_token: ""
+fleet_node_ntp_server: ntp.fleet.internal
+fleet_node_manage_services: true

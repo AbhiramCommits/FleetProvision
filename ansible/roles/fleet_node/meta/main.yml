@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  role_name: fleet_node
+  author: FleetProvision Authors
+  description: Install the FleetProvision agent, trust bundle, systemd units, chrony, and sshd hardening.
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+    - name: Fedora
+      versions:
+        - "40"
+  galaxy_tags:
+    - fleet
+    - security
+dependencies: []

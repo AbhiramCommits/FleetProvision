@@ -1,0 +1,10 @@
+{
+  "resources_planned": 27,
+  "module_addresses": [
+    "module.node[0]",
+    "module.node[1]",
+    "module.vpc"
+  ],
+  "terraform_version": "1.16.5",
+  "modules_validated": 5
+}

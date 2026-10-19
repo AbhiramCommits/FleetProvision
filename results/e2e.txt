@@ -1,63 +1,30 @@
-# FleetProvision control-plane e2e
+# FleetProvision provisioning e2e
 
-Generated 2026-10-19T19:51:12Z on Darwin 27.0.0 arm64.
+Generated 2026-10-19 20:21:31.766582 +00:00:00 on macos. 20 nodes requested, 20 succeeded, 0 failed, wall 83 ms.
 
-== enrolled nodes ==
-{
-  "count": 2,
-  "nodes": [
-    {
-      "attestation_passed": true,
-      "created_at": 1792439472,
-      "hostname": "n1",
-      "last_seen": 1792439472,
-      "node_id": "n1",
-      "not_after": 1800215472,
-      "serial_hex": "74c516163ba2bf778c1218398e0d697b",
-      "site": "dc1",
-      "state": "enrolled",
-      "violations": [],
-      "vlan": 100
-    },
-    {
-      "attestation_passed": true,
-      "created_at": 1792439472,
-      "hostname": "n2",
-      "last_seen": 1792439472,
-      "node_id": "n2",
-      "not_after": 1800215472,
-      "serial_hex": "4496ad34183abe33fd04662dacf4d36d",
-      "site": "dc1",
-      "state": "enrolled",
-      "violations": [],
-      "vlan": 100
-    }
-  ]
-}
-== revoking n2 ==
-{
-  "attestation_passed": true,
-  "created_at": 1792439472,
-  "hostname": "n2",
-  "last_seen": 1792439472,
-  "node_id": "n2",
-  "not_after": 1800215472,
-  "serial_hex": "4496ad34183abe33fd04662dacf4d36d",
-  "site": "dc1",
-  "state": "revoked",
-  "violations": [],
-  "vlan": 666
-}
-== revoked node handshake (exit 56) ==
-curl: (56) LibreSSL SSL_read: LibreSSL/3.3.6: error:1404C414:SSL routines:ST_OK:sslv3 alert certificate revoked, errno 0
+| node | mac | distro | total ms | vlan | stages | result |
+| --- | --- | --- | --- | --- | --- | --- |
+| rack-a-node-001 | 52:54:00:aa:bb:01 | ubuntu | 56 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=50ms 802.1x=1ms | OK |
+| rack-a-node-002 | 52:54:00:aa:bb:02 | fedora | 62 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=56ms 802.1x=0ms | OK |
+| rack-a-node-003 | 52:54:00:aa:bb:03 | ubuntu | 61 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=55ms 802.1x=1ms | OK |
+| rack-a-node-004 | 52:54:00:aa:bb:04 | fedora | 63 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=56ms 802.1x=1ms | OK |
+| rack-a-node-005 | 52:54:00:aa:bb:05 | ubuntu | 61 | 100 | dhcp=0ms tftp=0ms http=3ms dns=0ms attest+enroll=55ms 802.1x=1ms | OK |
+| rack-a-node-006 | 52:54:00:aa:bb:06 | fedora | 68 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=63ms 802.1x=0ms | OK |
+| rack-a-node-007 | 52:54:00:aa:bb:07 | ubuntu | 56 | 100 | dhcp=0ms tftp=1ms http=2ms dns=0ms attest+enroll=51ms 802.1x=0ms | OK |
+| rack-a-node-008 | 52:54:00:aa:bb:08 | fedora | 67 | 100 | dhcp=0ms tftp=0ms http=3ms dns=1ms attest+enroll=60ms 802.1x=1ms | OK |
+| rack-a-node-009 | 52:54:00:aa:bb:09 | ubuntu | 42 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=37ms 802.1x=0ms | OK |
+| rack-a-node-010 | 52:54:00:aa:bb:0a | fedora | 64 | 100 | dhcp=0ms tftp=0ms http=2ms dns=29ms attest+enroll=29ms 802.1x=1ms | OK |
+| rack-a-node-011 | 52:54:00:aa:bb:0b | ubuntu | 43 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=37ms 802.1x=1ms | OK |
+| rack-a-node-012 | 52:54:00:aa:bb:0c | fedora | 44 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=39ms 802.1x=0ms | OK |
+| rack-a-node-013 | 52:54:00:aa:bb:0d | ubuntu | 67 | 100 | dhcp=0ms tftp=1ms http=3ms dns=0ms attest+enroll=60ms 802.1x=1ms | OK |
+| rack-a-node-014 | 52:54:00:aa:bb:0e | fedora | 45 | 100 | dhcp=0ms tftp=0ms http=2ms dns=0ms attest+enroll=40ms 802.1x=0ms | OK |
+| rack-a-node-015 | 52:54:00:aa:bb:0f | ubuntu | 69 | 100 | dhcp=0ms tftp=0ms http=32ms dns=1ms attest+enroll=33ms 802.1x=0ms | OK |
+| rack-a-node-016 | 52:54:00:aa:bb:10 | fedora | 57 | 100 | dhcp=0ms tftp=0ms http=2ms dns=1ms attest+enroll=51ms 802.1x=0ms | OK |
+| rack-a-node-017 | 52:54:00:aa:bb:11 | ubuntu | 68 | 100 | dhcp=0ms tftp=1ms http=2ms dns=29ms attest+enroll=34ms 802.1x=0ms | OK |
+| rack-a-node-018 | 52:54:00:aa:bb:12 | fedora | 64 | 100 | dhcp=0ms tftp=1ms http=3ms dns=29ms attest+enroll=29ms 802.1x=1ms | OK |
+| rack-a-node-019 | 52:54:00:aa:bb:13 | ubuntu | 66 | 100 | dhcp=0ms tftp=1ms http=2ms dns=29ms attest+enroll=30ms 802.1x=2ms | OK |
+| rack-a-node-020 | 52:54:00:aa:bb:14 | fedora | 67 | 100 | dhcp=0ms tftp=0ms http=2ms dns=29ms attest+enroll=32ms 802.1x=1ms | OK |
 
-## fleetd log (real lines)
-```
-[2m2026-10-19T19:51:11.992315Z[0m [32m INFO[0m [2mfleetd[0m[2m:[0m fleetd starting [3mstate_dir[0m[2m=[0mout/e2e-control-plane/state [3mlisten[0m[2m=[0m127.0.0.1:56096 [3menroll_listen[0m[2m=[0m127.0.0.1:56097 [3moperator_listen[0m[2m=[0m127.0.0.1:56098
-[2m2026-10-19T19:51:11.999091Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m control plane listening [3mmtls_addr[0m[2m=[0m127.0.0.1:56096 [3menroll_addr[0m[2m=[0m127.0.0.1:56097 [3moperator_addr[0m[2m=[0m127.0.0.1:56098
-[2m2026-10-19T19:51:11.999137Z[0m [32m INFO[0m [2mfleetd[0m[2m:[0m fleetd ready [3mmtls[0m[2m=[0m127.0.0.1:56096 [3menroll[0m[2m=[0m127.0.0.1:56097 [3moperator[0m[2m=[0m127.0.0.1:56098
-[2m2026-10-19T19:51:12.691619Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node enrolled [3mnode_id[0m[2m=[0mn1 [3mserial[0m[2m=[0m74c516163ba2bf778c1218398e0d697b
-[2m2026-10-19T19:51:12.721348Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node enrolled [3mnode_id[0m[2m=[0mn2 [3mserial[0m[2m=[0m4496ad34183abe33fd04662dacf4d36d
-[2m2026-10-19T19:51:12.759435Z[0m [32m INFO[0m [2mfleetd::control[0m[2m:[0m node revoked [3mnode_id[0m[2m=[0mn2 [3mreason[0m[2m=[0mkey_compromise
-[2m2026-10-19T19:51:12.774391Z[0m [33m WARN[0m [2mfleetd::control[0m[2m:[0m tls handshake rejected [3merror[0m[2m=[0minvalid peer certificate: Revoked
-```
+802.1X: 20 nodes on VLAN 100, 0 on VLAN 666, 0 rejected.
+
+Per-node boot-to-enrolled: p50=63 ms, p95=68 ms, min=42 ms, max=69 ms.

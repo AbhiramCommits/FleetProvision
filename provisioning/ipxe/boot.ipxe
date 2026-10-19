@@ -1,0 +1,16 @@
+#!ipxe
+# FleetProvision first-stage iPXE. The DHCP server supplies next-server and
+# this filename; iPXE then chains to the per-MAC script rendered by
+# `fleet-sim render-ipxe`.
+:start
+dhcp || goto retry
+chain --autofree http://192.168.50.2:8080/ipxe/${mac:hexhyp}.ipxe || goto failed
+
+:retry
+echo DHCP failed, retrying in 3s
+sleep 3
+goto start
+
+:failed
+echo No per-MAC FleetProvision script; entering shell for diagnosis
+shell

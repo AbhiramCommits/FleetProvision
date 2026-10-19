@@ -717,6 +717,41 @@ impl Ca {
         Ok(pem)
     }
 
+    /// Issue a CRL with explicit validity offsets (hours from now). Used to
+    /// produce an already-expired CRL for fail-closed tests.
+    pub fn issue_crl_window(
+        &mut self,
+        this_update_offset_hours: i64,
+        next_update_offset_hours: i64,
+    ) -> Result<String, PkiError> {
+        let now = OffsetDateTime::now_utc();
+        let revoked_certs = self
+            .revoked
+            .iter()
+            .map(|r| RevokedCertParams {
+                serial_number: serial_from_hex(&r.serial_hex),
+                revocation_time: OffsetDateTime::from_unix_timestamp(r.revoked_at).unwrap_or(now),
+                reason_code: parse_reason(&r.reason).ok(),
+                invalidity_date: None,
+            })
+            .collect();
+        let params = CertificateRevocationListParams {
+            this_update: now + time::Duration::hours(this_update_offset_hours),
+            next_update: now + time::Duration::hours(next_update_offset_hours),
+            crl_number: SerialNumber::from_slice(&(self.crl_number + 1).to_be_bytes()),
+            issuing_distribution_point: None,
+            revoked_certs,
+            key_identifier_method: KeyIdMethod::Sha256,
+        };
+        let issuer = self.issuer_at(self.active)?;
+        let crl = params.signed_by(&issuer)?;
+        let pem = crl.pem()?;
+        self.crl_pem = Some(pem.clone());
+        self.crl_number += 1;
+        self.flush()?;
+        Ok(pem)
+    }
+
     pub fn crl_store(&self) -> Result<CrlStore, PkiError> {
         let pem = self
             .crl_pem

@@ -1,0 +1,28 @@
+site: dc1
+api: https://fleetd.fleet.internal:8443
+enroll_url: https://fleetd.fleet.internal:8444
+tftp_server: 192.168.50.2
+http_server: http://192.168.50.2:8080
+https_server: https://192.168.50.2:8443
+token_url: https://192.168.50.2:8443/tokens
+nodes:
+  - id: rack-a-node-01
+    mac: "52:54:00:5f:6c:01"
+    distro: ubuntu
+    vlan: 100
+    role: worker
+  - id: rack-a-node-02
+    mac: "52:54:00:5f:6c:02"
+    distro: fedora
+    vlan: 100
+    role: worker
+  - id: rack-a-node-03
+    mac: "52:54:00:5f:6c:03"
+    distro: ubuntu
+    vlan: 200
+    role: database
+  - id: rack-a-node-04
+    mac: "52:54:00:5f:6c:04"
+    distro: fedora
+    vlan: 100
+    role: worker

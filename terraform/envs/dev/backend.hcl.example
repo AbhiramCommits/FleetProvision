@@ -1,0 +1,7 @@
+# Copy to backend.hcl, create the bucket/table, then:
+#   terraform init -backend-config=backend.hcl
+bucket         = "fleetprovision-terraform-state"
+key            = "envs/dev/terraform.tfstate"
+region         = "us-east-1"
+encrypt        = true
+dynamodb_table = "fleetprovision-terraform-locks"

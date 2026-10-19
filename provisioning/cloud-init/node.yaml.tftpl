@@ -1,0 +1,64 @@
+#cloud-config
+# Rendered by Terraform for every FleetProvision node.
+hostname: ${hostname}
+fqdn: ${hostname}.fleet.internal
+manage_etc_hosts: true
+preserve_hostname: false
+
+users:
+  - default
+
+package_update: true
+packages:
+  - ca-certificates
+  - chrony
+  - curl
+  - jq
+  - openssl
+
+write_files:
+  - path: /etc/fleet-agent/trust-bundle.pem
+    owner: root:root
+    permissions: "0644"
+    encoding: b64
+    content: ${trust_bundle_b64}
+  - path: /etc/fleet-agent/enroll.env
+    owner: root:root
+    permissions: "0600"
+    encoding: b64
+    content: ${enroll_env_b64}
+  - path: /etc/fleet-agent/bootstrap-token
+    owner: root:root
+    permissions: "0600"
+    encoding: b64
+    content: ${bootstrap_token_b64}
+  - path: /etc/chrony/conf.d/fleet.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      # FleetProvision: prefer the site NTP servers, keep the distro pool as fallback.
+      pool ${ntp_server} iburst
+      makestep 1.0 3
+  - path: /etc/ssh/sshd_config.d/99-fleet-hardening.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      PermitRootLogin prohibit-password
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      X11Forwarding no
+      MaxAuthTries 3
+      AllowAgentForwarding no
+      AllowTcpForwarding no
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+
+runcmd:
+  - systemctl daemon-reload
+  - systemctl restart chrony
+  - systemctl reload ssh || systemctl reload sshd || true
+  - systemctl enable --now fleet-agent-renew.timer
+  - /usr/local/bin/fleet-agent enroll --enroll-url "${enroll_url}" --node-id "${node_id}" --site "${site}" --hostname "${hostname}" --token "$(cat /etc/fleet-agent/bootstrap-token)" --state-dir /var/lib/fleet-agent --ca-bundle /etc/fleet-agent/trust-bundle.pem --distro "${distro}"
+  - rm -f /etc/fleet-agent/bootstrap-token
+
+final_message: "FleetProvision node ${hostname} bootstrapped after $UPTIME seconds"
