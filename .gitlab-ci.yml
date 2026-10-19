@@ -1,0 +1,96 @@
+stages:
+  - lint
+  - test
+  - iac
+  - e2e
+  - bench
+
+variables:
+  CARGO_TERM_COLOR: always
+  CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
+  RUSTFLAGS: "-D warnings"
+
+default:
+  interruptible: true
+
+.rs-cache: &rs-cache
+  cache:
+    key: "cargo-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .cargo/registry/
+      - target/
+
+rust:fmt-clippy:
+  stage: lint
+  image: rust:latest
+  <<: *rs-cache
+  before_script:
+    - rustup component add rustfmt clippy
+  script:
+    - cargo fmt --all -- --check
+    - cargo clippy --workspace --all-targets -- -D warnings
+
+rust:test:
+  stage: test
+  image: rust:latest
+  <<: *rs-cache
+  script:
+    - cargo test --workspace
+  artifacts:
+    when: always
+    paths:
+      - results/
+    expire_in: 1 week
+
+iac:terraform-validate:
+  stage: iac
+  image: hashicorp/terraform:1.16.5
+  script:
+    - apk add --no-cache bash python3 py3-yaml
+    - bash scripts/iac-validate.sh
+
+iac:packer-validate:
+  stage: iac
+  image: hashicorp/packer:latest
+  script:
+    - apk add --no-cache bash python3 py3-yaml
+    - bash scripts/iac-validate.sh
+
+iac:ansible-lint:
+  stage: iac
+  image: python:3.12
+  script:
+    - pip install ansible-core ansible-lint
+    - ansible-lint ansible/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+e2e:provision-sim:
+  stage: e2e
+  image: rust:latest
+  <<: *rs-cache
+  script:
+    - cargo build -p fleet-sim --release
+    - cargo run -p fleet-sim --release -- e2e --nodes 20
+  artifacts:
+    when: always
+    paths:
+      - results/
+    expire_in: 1 week
+
+bench:metrics:
+  stage: bench
+  image: rust:latest
+  <<: *rs-cache
+  script:
+    - cargo build -p fleet-sim --release
+    - cargo run -p fleet-sim --release -- bench --out results
+  artifacts:
+    when: always
+    paths:
+      - results/
+    expire_in: 4 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

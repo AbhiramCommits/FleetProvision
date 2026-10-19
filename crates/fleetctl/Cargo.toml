@@ -1,0 +1,24 @@
+[package]
+name = "fleetctl"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+fleet-attest = { path = "../fleet-attest" }
+fleet-pki = { path = "../fleet-pki" }
+fleet-proto = { path = "../fleet-proto" }
+hex.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+time.workspace = true
+tokio.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

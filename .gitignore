@@ -1,0 +1,53 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+tfplan
+
+# Packer
+packer_cache/
+*.manifest.json
+
+# Runtime / generated artifacts
+out/
+sim/.venv/
+*.pem
+*.key
+*.crt
+!fixtures/**/*.pem
+!fixtures/**/*.key
+!docs/**/*.pem
+state/
+*.log
+audit.jsonl
+
+# Bench scratch data
+results/*.tmp
+results/*.raw
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv-tools/
+
+# IDE
+.idea/
+.vscode/
+
+# Local tool downloads
+.tools/

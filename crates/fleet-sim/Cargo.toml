@@ -1,0 +1,27 @@
+[package]
+name = "fleet-sim"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+base64.workspace = true
+clap.workspace = true
+fleet-attest = { path = "../fleet-attest" }
+fleet-pki = { path = "../fleet-pki" }
+fleet-proto = { path = "../fleet-proto" }
+hex.workspace = true
+p256.workspace = true
+rand.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
